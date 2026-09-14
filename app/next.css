@@ -8,6 +8,13 @@ body {
   display: contents;
 }
 
+/* The React shell wraps the legacy map siblings. display: contents does not
+   remove that wrapper from CSS child selectors. */
+body.portal-view #next-app-shell > .workspace,
+body.portal-view #next-app-shell > .topbar {
+  display: none;
+}
+
 .react-dialog {
   width: min(720px, calc(100vw - 32px));
   max-height: calc(100dvh - 40px);
