@@ -1,0 +1,27 @@
+#organization .owner-status {
+  min-width: 150px;
+  padding: 7px 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#organization .owner-status[data-owner-field="agreementStatus"] {
+  color: #654b16;
+  background: #fffaf0;
+}
+
+#organization .owner-status[data-owner-field="thankedStatus"] {
+  color: #24543c;
+  background: #f4fbf6;
+}
+
+#organization .owner-status[data-owner-field="landRole"] {
+  color: #234b61;
+  background: #f2f8fb;
+}
+
+#organization .owner-referent {
+  min-width: 175px;
+  color: #3d315e;
+  background: #f8f5fc;
+}

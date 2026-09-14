@@ -1,0 +1,675 @@
+{
+  "editions": {
+    "title": "Éditions",
+    "fields": [
+      [
+        "name",
+        "Nom",
+        "text",
+        true
+      ],
+      [
+        "season",
+        "Saison",
+        "season",
+        true
+      ],
+      [
+        "year",
+        "Année",
+        "number",
+        true
+      ],
+      [
+        "date",
+        "Date",
+        "date"
+      ],
+      [
+        "site",
+        "Site de départ / arrivée",
+        "text"
+      ],
+      [
+        "lat",
+        "Latitude",
+        "number"
+      ],
+      [
+        "lng",
+        "Longitude",
+        "number"
+      ],
+      [
+        "notes",
+        "Notes",
+        "textarea"
+      ]
+    ]
+  },
+  "courses": {
+    "title": "Parcours",
+    "fields": [
+      [
+        "name",
+        "Nom",
+        "text",
+        true
+      ],
+      [
+        "distance",
+        "Distance (km)",
+        "number",
+        true
+      ],
+      [
+        "gain",
+        "D+ (m)",
+        "number"
+      ],
+      [
+        "loss",
+        "D− (m)",
+        "number"
+      ],
+      [
+        "departureTime",
+        "Heure de départ",
+        "time",
+        true
+      ],
+      [
+        "firstDuration",
+        "Temps du 1er concurrent (HH:MM)",
+        "duration",
+        true
+      ],
+      [
+        "lastDuration",
+        "Temps du dernier participant (HH:MM)",
+        "duration",
+        true
+      ],
+      [
+        "volunteerLeadMinutes",
+        "Présence avant le 1er passage (min)",
+        "integer"
+      ],
+      [
+        "volunteerTailMinutes",
+        "Présence après le dernier passage (min)",
+        "integer"
+      ],
+      [
+        "color",
+        "Couleur",
+        "color",
+        true
+      ],
+      [
+        "visible",
+        "Afficher sur la carte",
+        "checkbox"
+      ],
+      [
+        "notes",
+        "Informations",
+        "textarea"
+      ]
+    ]
+  },
+  "volunteers": {
+    "title": "Bénévoles",
+    "fields": [
+      [
+        "firstName",
+        "Prénom",
+        "text",
+        true
+      ],
+      [
+        "lastName",
+        "Nom",
+        "text",
+        true
+      ],
+      [
+        "editionIds",
+        "Éditions auxquelles participe le bénévole",
+        "editions",
+        true
+      ],
+      [
+        "phone",
+        "Téléphone",
+        "tel"
+      ],
+      [
+        "email",
+        "Email",
+        "email"
+      ],
+      [
+        "notes",
+        "Notes privées",
+        "textarea"
+      ],
+      [
+        "active",
+        "Actif",
+        "checkbox"
+      ],
+      [
+        "organizationMember",
+        "Membre de l’organisation · peut être référent",
+        "checkbox"
+      ],
+      [
+        "publicVisible",
+        "Autoriser la publication des missions sur les postes publics",
+        "checkbox"
+      ]
+    ]
+  },
+  "posts": {
+    "title": "Besoins / Postes",
+    "fields": [
+      [
+        "number",
+        "Numéro unique dans l’édition",
+        "text",
+        true
+      ],
+      [
+        "postType",
+        "Type de poste",
+        "postType",
+        true
+      ],
+      [
+        "name",
+        "Nom du poste",
+        "text",
+        true
+      ],
+      [
+        "lat",
+        "Latitude",
+        "number"
+      ],
+      [
+        "lng",
+        "Longitude",
+        "number"
+      ],
+      [
+        "date",
+        "Date",
+        "date"
+      ],
+      [
+        "start",
+        "Horaire de début estimé",
+        "time"
+      ],
+      [
+        "endDate",
+        "Date de fin (si lendemain)",
+        "date"
+      ],
+      [
+        "end",
+        "Horaire de fin estimée",
+        "time"
+      ],
+      [
+        "required",
+        "Personnes nécessaires",
+        "integer",
+        true
+      ],
+      [
+        "equipmentNeeds",
+        "Matériel nécessaire",
+        "equipmentNeeds"
+      ],
+      [
+        "instructions",
+        "Consigne · expliquer le poste",
+        "textarea"
+      ],
+      [
+        "courseIds",
+        "Parcours concernés",
+        "courses"
+      ],
+      [
+        "publicVisible",
+        "Poste visible publiquement",
+        "checkbox"
+      ]
+    ]
+  },
+  "assignments": {
+    "title": "Affectations",
+    "fields": [
+      [
+        "volunteerId",
+        "Bénévole",
+        "ref:volunteers",
+        true
+      ],
+      [
+        "postId",
+        "Poste",
+        "ref:posts",
+        true
+      ],
+      [
+        "date",
+        "Date",
+        "date",
+        true
+      ],
+      [
+        "start",
+        "Heure de début",
+        "time"
+      ],
+      [
+        "endDate",
+        "Date de fin (si lendemain)",
+        "date"
+      ],
+      [
+        "end",
+        "Heure de fin",
+        "time"
+      ],
+      [
+        "instructions",
+        "Instructions visibles par le bénévole",
+        "textarea"
+      ],
+      [
+        "notes",
+        "Commentaire privé",
+        "textarea"
+      ]
+    ]
+  },
+  "aidStations": {
+    "title": "Ravitaillements",
+    "fields": [
+      [
+        "number",
+        "Numéro",
+        "text",
+        true
+      ],
+      [
+        "name",
+        "Nom",
+        "text",
+        true
+      ],
+      [
+        "lat",
+        "Latitude",
+        "number"
+      ],
+      [
+        "lng",
+        "Longitude",
+        "number"
+      ],
+      [
+        "courseIds",
+        "Parcours concernés",
+        "courses"
+      ],
+      [
+        "km",
+        "Kilomètre approximatif",
+        "number"
+      ],
+      [
+        "information",
+        "Informations publiques",
+        "textarea"
+      ],
+      [
+        "start",
+        "Ouverture",
+        "time"
+      ],
+      [
+        "end",
+        "Fermeture",
+        "time"
+      ],
+      [
+        "postId",
+        "Poste pour les affectations bénévoles",
+        "ref:posts"
+      ],
+      [
+        "visible",
+        "Afficher sur la carte",
+        "checkbox"
+      ]
+    ]
+  },
+  "owners": {
+    "title": "Agriculteurs / Propriétaires",
+    "fields": [
+      [
+        "firstName",
+        "Prénom",
+        "text"
+      ],
+      [
+        "lastName",
+        "Nom",
+        "text",
+        true
+      ],
+      [
+        "phone",
+        "Téléphone",
+        "tel"
+      ],
+      [
+        "email",
+        "Email",
+        "email"
+      ],
+      [
+        "landRole",
+        "Statut",
+        "ownerRole"
+      ],
+      [
+        "referentId",
+        "Référent organisation",
+        "ref:organizationMembers"
+      ],
+      [
+        "agreementStatus",
+        "Accord",
+        "ownerAgreement"
+      ],
+      [
+        "thankedStatus",
+        "Remercié",
+        "ownerThanked"
+      ],
+      [
+        "notes",
+        "Commentaire",
+        "textarea"
+      ]
+    ]
+  },
+  "parcels": {
+    "title": "Parcelles",
+    "fields": [
+      [
+        "name",
+        "Référence / nom",
+        "text",
+        true
+      ],
+      [
+        "ownerId",
+        "Propriétaire",
+        "ref:owners",
+        true
+      ],
+      [
+        "kind",
+        "Champ, bois, forêt…",
+        "text"
+      ],
+      [
+        "courseIds",
+        "Parcours concernés",
+        "courses"
+      ],
+      [
+        "notes",
+        "Commentaire / autorisation de passage",
+        "textarea"
+      ]
+    ]
+  },
+  "equipment": {
+    "title": "Matériel placé",
+    "fields": [
+      [
+        "name",
+        "Nom / repère",
+        "text"
+      ],
+      [
+        "typeId",
+        "Type de matériel",
+        "ref:equipmentTypes",
+        true
+      ],
+      [
+        "quantity",
+        "Quantité",
+        "integer",
+        true
+      ],
+      [
+        "lat",
+        "Latitude",
+        "number",
+        true
+      ],
+      [
+        "lng",
+        "Longitude",
+        "number",
+        true
+      ],
+      [
+        "orientation",
+        "Orientation (degrés)",
+        "number"
+      ],
+      [
+        "zone",
+        "Zone",
+        "text"
+      ],
+      [
+        "use",
+        "Utilisation",
+        "text"
+      ],
+      [
+        "tables",
+        "Tables (total pour cet élément)",
+        "integer"
+      ],
+      [
+        "chairs",
+        "Chaises (total pour cet élément)",
+        "integer"
+      ],
+      [
+        "electricity",
+        "Électricité nécessaire",
+        "checkbox"
+      ],
+      [
+        "water",
+        "Eau nécessaire",
+        "checkbox"
+      ],
+      [
+        "notes",
+        "Commentaire",
+        "textarea"
+      ]
+    ]
+  },
+  "equipmentTypes": {
+    "title": "Matériel",
+    "fields": [
+      [
+        "name",
+        "Nom du matériel",
+        "text",
+        true
+      ],
+      [
+        "equipmentGroup",
+        "Groupe",
+        "equipmentGroup",
+        true
+      ],
+      [
+        "availableQuantity",
+        "Quantité disponible",
+        "integer"
+      ],
+      [
+        "width",
+        "Largeur 3D (m) · facultatif",
+        "number"
+      ],
+      [
+        "depth",
+        "Profondeur 3D (m) · facultatif",
+        "number"
+      ],
+      [
+        "height",
+        "Hauteur 3D (m) · facultatif",
+        "number"
+      ],
+      [
+        "color",
+        "Couleur sur la carte",
+        "color",
+        true
+      ]
+    ]
+  },
+  "providers": {
+    "title": "Prestataires",
+    "fields": [
+      [
+        "company",
+        "Société",
+        "text",
+        true
+      ],
+      [
+        "typeId",
+        "Type",
+        "ref:providerTypes",
+        true
+      ],
+      [
+        "firstName",
+        "Prénom du contact",
+        "text"
+      ],
+      [
+        "lastName",
+        "Nom du contact",
+        "text"
+      ],
+      [
+        "phone",
+        "Téléphone",
+        "tel"
+      ],
+      [
+        "email",
+        "Email",
+        "email"
+      ],
+      [
+        "address",
+        "Adresse",
+        "text"
+      ],
+      [
+        "lat",
+        "Latitude",
+        "number"
+      ],
+      [
+        "lng",
+        "Longitude",
+        "number"
+      ],
+      [
+        "notes",
+        "Commentaire",
+        "textarea"
+      ]
+    ]
+  },
+  "providerTypes": {
+    "title": "Types de prestataires",
+    "fields": [
+      [
+        "name",
+        "Nom",
+        "text",
+        true
+      ]
+    ]
+  },
+  "mapElements": {
+    "title": "Éléments cartographiques",
+    "fields": [
+      [
+        "name",
+        "Nom",
+        "text",
+        true
+      ],
+      [
+        "kind",
+        "Départ, arrivée, bar, restauration, secours…",
+        "text",
+        true
+      ],
+      [
+        "lat",
+        "Latitude",
+        "number",
+        true
+      ],
+      [
+        "lng",
+        "Longitude",
+        "number",
+        true
+      ],
+      [
+        "courseIds",
+        "Parcours concernés",
+        "courses"
+      ],
+      [
+        "visible",
+        "Afficher publiquement",
+        "checkbox"
+      ],
+      [
+        "notes",
+        "Commentaire privé",
+        "textarea"
+      ]
+    ]
+  }
+}

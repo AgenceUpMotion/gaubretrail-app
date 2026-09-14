@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Gaubre’Trail · Organisation & bénévoles</title>
+  <link rel="stylesheet" href="./styles.css?v=20260911-13" />
+  <link rel="stylesheet" href="./organization.css?v=20260910-6" />
+  <link rel="stylesheet" href="./volunteer-table.css?v=20260911-25" />
+  <link rel="stylesheet" href="./owner-status.css?v=20260910-6" />
+  <link rel="stylesheet" href="./dashboard.css?v=20260910-6" />
+  <link rel="stylesheet" href="./brand.css?v=20260911-4" />
+</head>
+<body class="portal-view">
+  <div id="portal"><p class="portal-loading" role="status">Chargement de Gaubre’Trail…</p></div>
+  <header class="topbar">
+    <div class="view-badge"><span>⛰</span> Carte 3D</div>
+    <div class="topbar-brand"><img src="./assets/logo-gaubretrail.svg" alt="Gaubre’Trail"></div>
+    <div class="topbar-actions">
+      <button id="managerButton" class="topbar-action manager-action">👥 Gestion du trail</button>
+      <button id="planButton" class="topbar-action secondary-action">Plan d'arrivée</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside id="panel" class="panel">
+      <div class="panel-heading"><span>⚙</span> Explorer les parcours</div>
+      <p class="panel-intro">Choisissez une distance puis explorez le tracé et le village Gaubre'Trail en relief.</p>
+
+      <section class="panel-section edition-card">
+        <label for="editionSelect">Édition affichée</label>
+        <select id="editionSelect">
+          <option value="summer">Été 2026</option>
+          <option value="winter">Hiver · nocturne</option>
+        </select>
+        <small id="editionHint">Parcours estivaux et village de départ.</small>
+      </section>
+
+      <section id="editionRoutes" class="panel-section">
+        <div class="section-title"><strong>Parcours de l’édition</strong><span id="routeCount">4 parcours</span></div>
+        <div id="routeSwitcher" class="route-switcher" aria-label="Choisir un parcours">
+          <button data-route="42" class="route active"><i class="dot black"></i><span><strong>42 km</strong><small>Grand trail</small></span></button>
+          <button data-route="26" class="route"><i class="dot red"></i><span><strong>26 km</strong><small>Trail long</small></span></button>
+          <button data-route="17" class="route"><i class="dot blue"></i><span><strong>17 km</strong><small>Trail court</small></span></button>
+          <button data-route="8" class="route"><i class="dot green"></i><span><strong>8 km</strong><small>Découverte</small></span></button>
+        </div>
+        <small class="route-note">Sélectionnez un ou plusieurs parcours. Un repère est affiché à chaque kilomètre.</small>
+      </section>
+
+      <section class="panel-section options">
+        <div class="section-title"><strong>Filtres de la carte</strong></div>
+        <div class="toggles">
+          <label><span>Bénévoles</span><input id="staffToggle" type="checkbox" checked></label>
+          <div class="post-status-legend" aria-label="Couleurs des postes"><span><i class="is-complete"></i>Équipe complète</span><span><i class="is-incomplete"></i>À renforcer</span><span><i class="is-empty"></i>À affecter</span></div>
+          <label><span>Propriétaires</span><input id="ownersToggle" type="checkbox" checked></label>
+          <label><span>Ravitaillements</span><input id="aidToggle" type="checkbox" checked></label>
+          <label><span>Photographes</span><input id="photographersToggle" type="checkbox" checked></label>
+        </div>
+      </section>
+
+      <section class="panel-section options secondary-options">
+        <div class="section-title"><strong>Fond et décor</strong></div>
+        <div class="toggles">
+          <label><span>Vue satellite</span><input id="satelliteToggle" type="checkbox"></label>
+          <label><span>Arbres Three.js</span><input id="treesToggle" type="checkbox" checked></label>
+          <label><span>Bâtiments Three.js</span><input id="buildingsToggle" type="checkbox" checked></label>
+          <label><span>Village Gaubre'Trail</span><input id="eventToggle" type="checkbox" checked></label>
+          <label><span>Relief 3D</span><input id="terrainToggle" type="checkbox" checked></label>
+        </div>
+        <p id="landscapeStatus" class="landscape-status">Chargement de la végétation 3D…</p>
+      </section>
+
+      <div class="panel-footer"><small>La Gaubretière · Vendée</small><small>OpenStreetMap · OpenFreeMap · MapLibre DEM</small></div>
+    </aside>
+
+    <section class="map-stage">
+      <div id="map"></div>
+      <div class="map-title">
+        <span><strong id="routeTitle">42 KM</strong> · GAUBRE'TRAIL</span>
+        <h1 id="mapHeading">Les parcours en relief</h1>
+      </div>
+      <div class="volunteer-finder">
+        <label for="publicVolunteerSearch">Retrouver mon poste</label>
+        <input id="publicVolunteerSearch" type="search" autocomplete="off" placeholder="Saisissez votre nom…">
+        <div id="publicVolunteerResults" class="finder-results"></div>
+      </div>
+      <div id="drawingToolbar" class="drawing-toolbar" hidden>
+        <strong id="drawingTitle">Tracer sur la carte</strong>
+        <span id="drawingHelp">Cliquez pour ajouter des points.</span>
+        <div><button id="cancelDrawing" type="button">Annuler</button><button id="finishDrawing" type="button">Terminer</button></div>
+      </div>
+      <div class="map-hint">Glisser pour déplacer · molette pour zoomer · clic droit pour pivoter</div>
+      <button id="menuButton" class="menu-button" aria-label="Afficher les contrôles">⚙ Parcours</button>
+    </section>
+  </main>
+
+  <aside id="managerDrawer" class="manager-drawer" aria-hidden="true">
+    <header class="manager-header">
+      <div><span class="eyebrow">ORGANISATION</span><h2>Équipe terrain</h2></div>
+      <button id="closeManager" class="icon-button" aria-label="Fermer">×</button>
+    </header>
+    <div class="manager-edition">
+      <span id="managerEditionName">Été 2026</span>
+      <div class="manager-stats"><strong id="volunteerCount">0</strong> bénévoles · <strong id="terrainCount">0</strong> éléments terrain · <strong id="gpxCount">0</strong> parcours</div>
+    </div>
+    <nav class="manager-tabs" aria-label="Gestion terrain">
+      <button class="manager-tab active" data-tab="volunteers">Bénévoles</button>
+      <button class="manager-tab" data-tab="signs">Terrain</button>
+      <button class="manager-tab" data-tab="routes">Importer GPX</button>
+      <button class="manager-tab" data-tab="profiles">Fiches parcours</button>
+      <button class="manager-tab" data-tab="backup">Sauvegarde</button>
+    </nav>
+
+    <div class="manager-content">
+      <section class="manager-pane active" data-pane="volunteers">
+        <form id="volunteerForm" class="manager-form">
+          <input id="volunteerId" type="hidden">
+          <label>Nom du bénévole<input id="volunteerName" required placeholder="Prénom Nom"></label>
+          <div class="coordinates-row">
+            <label>Téléphone<input id="volunteerPhone" type="tel" autocomplete="tel" placeholder="06 00 00 00 00"></label>
+            <label>E-mail<input id="volunteerEmail" type="email" autocomplete="email" placeholder="nom@exemple.fr"></label>
+          </div>
+          <label>Rôle<select id="volunteerRole" required>
+            <option value="commissaire">Commissaire</option>
+            <option value="ravitaillement">Ravitaillement</option>
+            <option value="consigne">Consigne</option>
+            <option value="retrait_dossard">Retrait dossard</option>
+            <option value="retrait_puce">Retrait puce</option>
+            <option value="parking">Parking</option>
+          </select></label>
+          <label>Consigne<textarea id="volunteerInstruction" rows="3" placeholder="Mission, horaires, point de vigilance…"></textarea></label>
+          <label>Matériel nécessaire<textarea id="volunteerEquipment" rows="2" placeholder="Gilet, radio, barrières…"></textarea></label>
+          <div class="coordinates-row">
+            <label>Latitude<input id="volunteerLat" type="number" step="any" required></label>
+            <label>Longitude<input id="volunteerLng" type="number" step="any" required></label>
+          </div>
+          <button id="pickVolunteerLocation" class="location-button" type="button">⌖ Choisir l'emplacement sur la carte</button>
+          <fieldset class="history-editor">
+            <legend>Affectations précédentes</legend>
+            <div class="history-entry-fields">
+              <input id="historyYear" type="number" min="2000" max="2100" placeholder="Année">
+              <select id="historyRole"><option value="commissaire">Commissaire</option><option value="ravitaillement">Ravitaillement</option><option value="consigne">Consigne</option><option value="retrait_dossard">Retrait dossard</option><option value="retrait_puce">Retrait puce</option><option value="parking">Parking</option></select>
+              <input id="historyLocation" placeholder="Lieu / secteur">
+              <button id="addHistory" class="ghost-button" type="button">Ajouter</button>
+            </div>
+            <div id="historyDraftList" class="history-list"></div>
+          </fieldset>
+          <div class="form-actions"><button id="cancelVolunteerEdit" class="ghost-button" type="button" hidden>Annuler</button><button class="primary-button" type="submit">Enregistrer le bénévole</button></div>
+        </form>
+        <div class="admin-toolbar">
+          <div><strong>Annuaire administratif</strong><small id="adminVolunteerCount"></small></div>
+          <input id="adminVolunteerSearch" type="search" placeholder="Rechercher un nom, mail, téléphone…">
+          <select id="adminRoleFilter"><option value="">Tous les rôles</option><option value="commissaire">Commissaires</option><option value="ravitaillement">Ravitaillement</option><option value="consigne">Consigne</option><option value="retrait_dossard">Retrait dossard</option><option value="retrait_puce">Retrait puce</option><option value="parking">Parking</option></select>
+          <label class="admin-visible"><input id="adminStaffVisible" type="checkbox" checked> Afficher les bénévoles sur la carte</label>
+        </div>
+        <div id="volunteerList" class="admin-volunteer-list"></div>
+      </section>
+
+      <section class="manager-pane" data-pane="signs">
+        <details class="terrain-tool" open>
+          <summary>Panneaux de sécurité</summary>
+        <form id="signForm" class="manager-form">
+          <label>Texte du panneau<input id="signLabel" required value="ATTENTION — COURSE À PIED"></label>
+          <label>Note / sens de pose<textarea id="signNote" rows="2" placeholder="Visible depuis la D755, orienté vers…"></textarea></label>
+          <div class="coordinates-row">
+            <label>Latitude<input id="signLat" type="number" step="any" required></label>
+            <label>Longitude<input id="signLng" type="number" step="any" required></label>
+          </div>
+          <button id="pickSignLocation" class="location-button" type="button">⌖ Choisir l'emplacement sur la carte</button>
+          <button class="primary-button" type="submit">Ajouter le panneau</button>
+        </form>
+        <div id="signList" class="manager-list"></div>
+        </details>
+
+        <details class="terrain-tool">
+          <summary>Ravitaillements du parcours</summary>
+          <form id="aidForm" class="manager-form">
+            <label>Nom du ravitaillement<input id="aidName" required placeholder="Ravito km 17"></label>
+            <div class="coordinates-row"><label>Ouverture<input id="aidOpen" type="time"></label><label>Fermeture<input id="aidClose" type="time"></label></div>
+            <label>Responsable<input id="aidManager" placeholder="Nom du responsable"></label>
+            <label>Produits et matériel<textarea id="aidSupplies" rows="3" placeholder="Eau, fruits, gobelets, tables…"></textarea></label>
+            <div class="coordinates-row"><label>Latitude<input id="aidLat" type="number" step="any" required></label><label>Longitude<input id="aidLng" type="number" step="any" required></label></div>
+            <button id="pickAidLocation" class="location-button" type="button">⌖ Choisir l'emplacement sur la carte</button>
+            <button class="primary-button" type="submit">Ajouter le ravitaillement</button>
+          </form>
+          <div id="aidList" class="manager-list"></div>
+        </details>
+
+        <details class="terrain-tool">
+          <summary>Zones à débroussailler</summary>
+          <form id="brushForm" class="manager-form">
+            <label>Nom de la zone<input id="brushName" required placeholder="Chemin du Bois — secteur 1"></label>
+            <div class="coordinates-row"><label>Priorité<select id="brushPriority"><option value="high">Haute</option><option value="normal" selected>Normale</option><option value="low">Basse</option></select></label><label>À réaliser avant<input id="brushDeadline" type="date"></label></div>
+            <label>Responsable<input id="brushManager" placeholder="Équipe ou personne"></label>
+            <label>Consigne et matériel<textarea id="brushNote" rows="3" placeholder="Largeur à dégager, débroussailleuse, EPI…"></textarea></label>
+            <button id="drawBrush" class="location-button" type="submit">▱ Tracer la zone sur la carte</button>
+          </form>
+          <div id="brushList" class="manager-list"></div>
+        </details>
+
+        <details class="terrain-tool">
+          <summary>Balisage et débalisage</summary>
+          <form id="markingForm" class="manager-form">
+            <label>Nom du secteur<input id="markingName" required placeholder="42 km — secteur La Brière"></label>
+            <div class="coordinates-row"><label>État<select id="markingStatus"><option value="to_mark">À baliser</option><option value="marked">Balisé</option><option value="to_unmark">À débaliser</option><option value="unmarked">Débalisé</option></select></label><label>Date prévue<input id="markingDate" type="date"></label></div>
+            <label>Responsable<input id="markingManager" placeholder="Équipe ou personne"></label>
+            <label>Consigne<textarea id="markingNote" rows="2" placeholder="Couleur, fléchage, points sensibles…"></textarea></label>
+            <button id="drawMarking" class="location-button" type="submit">⌁ Tracer le secteur sur la carte</button>
+          </form>
+          <div id="markingList" class="manager-list"></div>
+        </details>
+      </section>
+
+      <section class="manager-pane" data-pane="routes">
+        <div class="import-card">
+          <strong>Importer un parcours GPX</strong>
+          <p>Le parcours sera rattaché uniquement à l'édition sélectionnée.</p>
+          <label class="file-button">Choisir un fichier .gpx<input id="gpxInput" type="file" accept=".gpx,application/gpx+xml"></label>
+        </div>
+        <div id="gpxList" class="manager-list"></div>
+      </section>
+
+      <section class="manager-pane" data-pane="profiles">
+        <div class="profiles-heading"><strong>Fiches parcours</strong><p>Distance, dénivelé positif, dénivelé négatif et profil altimétrique.</p></div>
+        <div id="profileList" class="profile-list"></div>
+      </section>
+
+      <section class="manager-pane" data-pane="backup">
+        <div class="backup-card">
+          <strong>Sauvegarde des deux éditions</strong>
+          <p>Les données sont enregistrées automatiquement sur cet appareil. Exportez régulièrement un fichier de secours.</p>
+          <button id="exportData" class="primary-button" type="button">↓ Exporter toutes les données</button>
+          <label class="file-button">↑ Restaurer un fichier JSON<input id="importData" type="file" accept="application/json,.json"></label>
+          <small id="backupStatus"></small>
+        </div>
+      </section>
+    </div>
+  </aside>
+  <div id="drawerScrim" class="drawer-scrim"></div>
+
+  <dialog id="planDialog">
+    <button id="closePlan" class="close-plan">×</button>
+    <img src="./assets/plan-gaubretrail-2026.jpg" alt="Plan Gaubre'Trail 2026" />
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,19 @@
+node_modules/
+.next/
+.next-dev/
+.storage/
+.env*
+!.env.example
+api/config.php
+api/storage/
+out/
+npm-debug.log*
+
+# Données de travail et exports privés, conservés uniquement en local.
+imports/
+*.xlsx
+*.xls
+*.sqlite*
+*.db
+public/
+map-*.png

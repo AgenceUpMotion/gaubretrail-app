@@ -1,0 +1,1126 @@
+{
+  "schemaVersion": 3,
+  "editions": [
+    {
+      "id": "summer-2026",
+      "season": "summer",
+      "year": 2026,
+      "name": "Été 2026",
+      "date": "",
+      "site": "Parc du Château de Landebaudière",
+      "lat": 46.9452378,
+      "lng": -1.0715847,
+      "notes": ""
+    },
+    {
+      "id": "winter-2026",
+      "season": "winter",
+      "year": 2026,
+      "name": "Hiver 2026",
+      "date": "",
+      "site": "Complexe des Tourelles, rue du Stade",
+      "lat": 46.941578,
+      "lng": -1.0607012,
+      "notes": "Centrage sur le bâtiment OSM des Tourelles. Positions de départ, arrivée et matériel à placer selon le plan d’organisation."
+    }
+  ],
+  "courses": [
+    {
+      "id": "summer-42",
+      "editionId": "summer-2026",
+      "name": "42 km",
+      "distance": 42,
+      "color": "#111111",
+      "visible": true,
+      "source": "./data/routes/42.geojson"
+    },
+    {
+      "id": "summer-26",
+      "editionId": "summer-2026",
+      "name": "26 km",
+      "distance": 26,
+      "color": "#ef3340",
+      "visible": false,
+      "source": "./data/routes/26.geojson"
+    },
+    {
+      "id": "summer-17",
+      "editionId": "summer-2026",
+      "name": "17 km",
+      "distance": 17,
+      "color": "#2088ff",
+      "visible": false,
+      "source": "./data/routes/17.geojson"
+    },
+    {
+      "id": "summer-8",
+      "editionId": "summer-2026",
+      "name": "8 km",
+      "distance": 8,
+      "color": "#24a148",
+      "visible": false,
+      "source": "./data/routes/8.geojson"
+    },
+    {
+      "id": "winter-20",
+      "editionId": "winter-2026",
+      "name": "20 km hiver",
+      "distance": 20,
+      "color": "#8759d7",
+      "visible": true
+    },
+    {
+      "id": "winter-10",
+      "editionId": "winter-2026",
+      "name": "10 km hiver",
+      "distance": 10,
+      "color": "#e2a321",
+      "visible": true
+    }
+  ],
+  "volunteers": [],
+  "assignments": [],
+  "posts": [
+    {
+      "id": "summer-2026-post-7a",
+      "editionId": "summer-2026",
+      "number": "7A",
+      "name": "Route de Saint Martin (bas)",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:50",
+          "10:30"
+        ]
+      ],
+      "start": "09:50",
+      "end": "10:30",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–10:30",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.946464,
+      "lng": -1.0646474
+    },
+    {
+      "id": "summer-2026-post-7b",
+      "editionId": "summer-2026",
+      "number": "7B",
+      "name": "Route des Landes - arrivée",
+      "required": 3,
+      "timeSlots": [
+        [
+          "09:55",
+          "10:40"
+        ]
+      ],
+      "start": "09:55",
+      "end": "10:40",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:55–10:40",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9454174,
+      "lng": -1.069011
+    },
+    {
+      "id": "summer-2026-post-14a",
+      "editionId": "summer-2026",
+      "number": "14A",
+      "name": "Vallée de la Rainetière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:42",
+          "10:22"
+        ]
+      ],
+      "start": "09:42",
+      "end": "10:22",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:42–10:22",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9405865,
+      "lng": -1.0437655
+    },
+    {
+      "id": "summer-2026-post-14b",
+      "editionId": "summer-2026",
+      "number": "14B",
+      "name": "Rond point de Chambretaud",
+      "required": 3,
+      "timeSlots": [
+        [
+          "09:48",
+          "10:37"
+        ]
+      ],
+      "start": "09:48",
+      "end": "10:37",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:48–10:37",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9330029,
+      "lng": -1.0515027
+    },
+    {
+      "id": "summer-2026-post-26a",
+      "editionId": "summer-2026",
+      "number": "26B",
+      "name": "Route de la Verrie",
+      "required": 4,
+      "timeSlots": [
+        [
+          "08:30",
+          "08:45"
+        ]
+      ],
+      "start": "08:30",
+      "end": "08:45",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 08:30–08:45",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.943353,
+      "lng": -1.0583415
+    },
+    {
+      "id": "summer-2026-post-26c",
+      "editionId": "summer-2026",
+      "number": "26C",
+      "name": "Rue de l'Aubretière",
+      "required": 2,
+      "description": "Mission importée depuis la répartition Été 2026",
+      "instructions": "Présence prévue : 8h35 - 8h50",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.942766,
+      "lng": -1.054029
+    },
+    {
+      "id": "summer-2026-post-26d",
+      "editionId": "summer-2026",
+      "number": "26D",
+      "name": "L'Aubretière",
+      "required": 2,
+      "description": "Mission importée depuis la répartition Été 2026",
+      "instructions": "Présence prévue : 8h35 - 8h50",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9446916,
+      "lng": -1.050148
+    },
+    {
+      "id": "summer-2026-post-a",
+      "editionId": "summer-2026",
+      "number": "A1",
+      "name": "Départ 42km et 26km",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Départ des courses · emplacement importé depuis Google My Maps",
+      "instructions": "Présence prévue : 07:25–09:40",
+      "courseIds": [
+        "summer-26",
+        "summer-42"
+      ],
+      "publicVisible": false,
+      "lat": 46.9440688,
+      "lng": -1.0729391
+    },
+    {
+      "id": "summer-2026-post-a2",
+      "editionId": "summer-2026",
+      "number": "A2",
+      "name": "Départ 42km",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Départ des courses · emplacement importé depuis Google My Maps",
+      "instructions": "PrÃ©sence prÃ©vue : 07:25â€“09:40",
+      "courseIds": [
+        "summer-42"
+      ],
+      "publicVisible": false,
+      "lat": 46.9446208,
+      "lng": -1.0780907
+    },
+    {
+      "id": "summer-2026-post-a3",
+      "editionId": "summer-2026",
+      "number": "A3",
+      "name": "départ 26km",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Départ des courses · emplacement importé depuis Google My Maps",
+      "instructions": "PrÃ©sence prÃ©vue : 07:25â€“09:40",
+      "courseIds": [
+        "summer-26"
+      ],
+      "publicVisible": false,
+      "lat": 46.9429131,
+      "lng": -1.0688574
+    },
+    {
+      "id": "summer-2026-post-a4",
+      "editionId": "summer-2026",
+      "number": "A4",
+      "name": "départ 26km",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Départ des courses · emplacement importé depuis Google My Maps",
+      "instructions": "PrÃ©sence prÃ©vue : 07:25â€“09:40",
+      "courseIds": [
+        "summer-26"
+      ],
+      "publicVisible": false,
+      "lat": 46.9449483,
+      "lng": -1.0679378
+    },
+    {
+      "id": "summer-2026-post-a5",
+      "editionId": "summer-2026",
+      "number": "A5",
+      "name": "Départ 17 km et 8km",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Départ des courses · emplacement importé depuis Google My Maps",
+      "instructions": "PrÃ©sence prÃ©vue : 07:25â€“09:40",
+      "courseIds": [
+        "summer-8",
+        "summer-17"
+      ],
+      "publicVisible": false,
+      "lat": 46.9470459,
+      "lng": -1.0718539
+    },
+    {
+      "id": "summer-2026-post-a6",
+      "editionId": "summer-2026",
+      "number": "A6",
+      "name": "Départ 17km et 8km",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Départ des courses · emplacement importé depuis Google My Maps",
+      "instructions": "PrÃ©sence prÃ©vue : 07:25â€“09:40",
+      "courseIds": [
+        "summer-8",
+        "summer-17"
+      ],
+      "publicVisible": false,
+      "lat": 46.9481243,
+      "lng": -1.0731823
+    },
+    {
+      "id": "summer-2026-post-b",
+      "editionId": "summer-2026",
+      "number": "B",
+      "name": "La Grande Nallière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "07:50",
+          "08:15"
+        ]
+      ],
+      "start": "07:50",
+      "end": "08:15",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 07:50–08:15",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9567692,
+      "lng": -1.0972132
+    },
+    {
+      "id": "summer-2026-post-b2",
+      "editionId": "summer-2026",
+      "number": "B2",
+      "name": "Réunion 42-17-8",
+      "required": 1,
+      "timeSlots": [
+        [
+          "07:25",
+          "09:40"
+        ]
+      ],
+      "start": "07:25",
+      "end": "09:40",
+      "description": "Réunion des parcours · emplacement importé depuis Google My Maps",
+      "instructions": "PrÃ©sence prÃ©vue : 07:25â€“09:40",
+      "courseIds": [
+        "summer-8",
+        "summer-17",
+        "summer-42"
+      ],
+      "publicVisible": false,
+      "lat": 46.9594054,
+      "lng": -1.0736312
+    },
+    {
+      "id": "summer-2026-post-bar1",
+      "editionId": "summer-2026",
+      "number": "BAR1",
+      "name": "Bar 1",
+      "required": 11,
+      "timeSlots": [
+        [
+          "10:15",
+          "13:00"
+        ]
+      ],
+      "start": "10:15",
+      "end": "13:00",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 10:15–13:00",
+      "courseIds": [],
+      "publicVisible": false
+    },
+    {
+      "id": "summer-2026-post-bar2",
+      "editionId": "summer-2026",
+      "number": "BAR2",
+      "name": "Bar 2",
+      "required": 11,
+      "timeSlots": [
+        [
+          "11:15",
+          "14:00"
+        ]
+      ],
+      "start": "11:15",
+      "end": "14:00",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 11:15–14:00",
+      "courseIds": [],
+      "publicVisible": false
+    },
+    {
+      "id": "summer-2026-post-c",
+      "editionId": "summer-2026",
+      "number": "C",
+      "name": "Route de Saint Martin (haut)",
+      "required": 3,
+      "timeSlots": [
+        [
+          "08:20",
+          "09:05"
+        ],
+        [
+          "09:15",
+          "09:30"
+        ],
+        [
+          "09:45",
+          "10:10"
+        ]
+      ],
+      "start": "08:20",
+      "end": "10:10",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 08:20–09:05 puis 09:15–09:30 puis 09:45–10:10",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9482773,
+      "lng": -1.0634526
+    },
+    {
+      "id": "summer-2026-post-d",
+      "editionId": "summer-2026",
+      "number": "D",
+      "name": "bifurcation 1 - Le Sourdy",
+      "required": 2,
+      "timeSlots": [
+        [
+          "08:20",
+          "09:05"
+        ],
+        [
+          "09:15",
+          "09:30"
+        ],
+        [
+          "09:45",
+          "10:10"
+        ]
+      ],
+      "start": "08:20",
+      "end": "10:10",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 08:20–09:05 puis 09:15–09:30 puis 09:45–10:10",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9458572,
+      "lng": -1.0561627
+    },
+    {
+      "id": "summer-2026-post-e",
+      "editionId": "summer-2026",
+      "number": "E",
+      "name": "Ravito 1 (42km et 17km)",
+      "required": 4,
+      "timeSlots": [
+        [
+          "08:45",
+          "10:10"
+        ]
+      ],
+      "start": "08:45",
+      "end": "10:10",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 08:45–10:10",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.948215,
+      "lng": -1.0363809
+    },
+    {
+      "id": "summer-2026-post-f",
+      "editionId": "summer-2026",
+      "number": "F",
+      "name": "Bifurcation 2 - La Delinière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "08:45",
+          "10:15"
+        ]
+      ],
+      "start": "08:45",
+      "end": "10:15",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 08:45–10:15",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9413226,
+      "lng": -1.0328392
+    },
+    {
+      "id": "summer-2026-post-g",
+      "editionId": "summer-2026",
+      "number": "G",
+      "name": "La Combretière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:00",
+          "10:15"
+        ]
+      ],
+      "start": "09:00",
+      "end": "10:15",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:00–10:15",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9440277,
+      "lng": -1.0078284
+    },
+    {
+      "id": "summer-2026-post-h",
+      "editionId": "summer-2026",
+      "number": "H",
+      "name": "La Terrière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:15",
+          "10:45"
+        ]
+      ],
+      "start": "09:15",
+      "end": "10:45",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:15–10:45",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9378874,
+      "lng": -0.9990633
+    },
+    {
+      "id": "summer-2026-post-i",
+      "editionId": "summer-2026",
+      "number": "I",
+      "name": "Ravito 2 (26 et 42km) - La Rousselière",
+      "required": 3,
+      "timeSlots": [
+        [
+          "09:15",
+          "10:45"
+        ]
+      ],
+      "start": "09:15",
+      "end": "10:45",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:15–10:45",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.933531,
+      "lng": -1.0138679
+    },
+    {
+      "id": "summer-2026-post-j",
+      "editionId": "summer-2026",
+      "number": "J",
+      "name": "Route de Chambretaud",
+      "required": 3,
+      "timeSlots": [
+        [
+          "09:22",
+          "10:45"
+        ]
+      ],
+      "start": "09:22",
+      "end": "10:45",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:22–10:45",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9274633,
+      "lng": -1.0049841
+    },
+    {
+      "id": "summer-2026-post-k",
+      "editionId": "summer-2026",
+      "number": "K",
+      "name": "La Grillière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:34",
+          "11:05"
+        ]
+      ],
+      "start": "09:34",
+      "end": "11:05",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:34–11:05",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9131908,
+      "lng": -1.0258434
+    },
+    {
+      "id": "summer-2026-post-l",
+      "editionId": "summer-2026",
+      "number": "L",
+      "name": "Bas de la Samilière",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:38",
+          "11:15"
+        ]
+      ],
+      "start": "09:38",
+      "end": "11:15",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:38–11:15",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9140605,
+      "lng": -1.0408894
+    },
+    {
+      "id": "summer-2026-post-m",
+      "editionId": "summer-2026",
+      "number": "M",
+      "name": "Ravito 3 (26 et 42km)",
+      "required": 3,
+      "timeSlots": [
+        [
+          "09:42",
+          "11:23"
+        ]
+      ],
+      "start": "09:42",
+      "end": "11:23",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:42–11:23",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9168248,
+      "lng": -1.0371114
+    },
+    {
+      "id": "summer-2026-post-n",
+      "editionId": "summer-2026",
+      "number": "N",
+      "name": "Pont de l'autoroute",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:44",
+          "11:25"
+        ]
+      ],
+      "start": "09:44",
+      "end": "11:25",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:44–11:25",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9208815,
+      "lng": -1.032834
+    },
+    {
+      "id": "summer-2026-post-o",
+      "editionId": "summer-2026",
+      "number": "O",
+      "name": "Emainjardières",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:46",
+          "11:27"
+        ]
+      ],
+      "start": "09:46",
+      "end": "11:27",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:46–11:27",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9226372,
+      "lng": -1.0389247
+    },
+    {
+      "id": "summer-2026-post-p",
+      "editionId": "summer-2026",
+      "number": "P",
+      "name": "La Suzelle",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:50",
+          "11:40"
+        ]
+      ],
+      "start": "09:50",
+      "end": "11:40",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–11:40",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9195603,
+      "lng": -1.0469111
+    },
+    {
+      "id": "summer-2026-post-q",
+      "editionId": "summer-2026",
+      "number": "Q",
+      "name": "Route des Herbiers",
+      "required": 4,
+      "timeSlots": [
+        [
+          "09:50",
+          "11:55"
+        ]
+      ],
+      "start": "09:50",
+      "end": "11:55",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–11:55",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9313241,
+      "lng": -1.0548051
+    },
+    {
+      "id": "summer-2026-post-r",
+      "editionId": "summer-2026",
+      "number": "R",
+      "name": "Rond point des Herbiers",
+      "required": 4,
+      "timeSlots": [
+        [
+          "09:50",
+          "11:55"
+        ]
+      ],
+      "start": "09:50",
+      "end": "11:55",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–11:55",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9314395,
+      "lng": -1.0553442
+    },
+    {
+      "id": "summer-2026-post-s",
+      "editionId": "summer-2026",
+      "number": "S",
+      "name": "Ravito 4 - L'Herbaudellerie",
+      "required": 3,
+      "timeSlots": [
+        [
+          "09:50",
+          "12:00"
+        ]
+      ],
+      "start": "09:50",
+      "end": "12:00",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–12:00",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9362966,
+      "lng": -1.0593753
+    },
+    {
+      "id": "summer-2026-post-t",
+      "editionId": "summer-2026",
+      "number": "T",
+      "name": "Rue du bocage",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:50",
+          "12:05"
+        ]
+      ],
+      "start": "09:50",
+      "end": "12:05",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–12:05",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9384903,
+      "lng": -1.0652121
+    },
+    {
+      "id": "summer-2026-post-u",
+      "editionId": "summer-2026",
+      "number": "U",
+      "name": "Route de Bazoges",
+      "required": 4,
+      "timeSlots": [
+        [
+          "09:50",
+          "12:10"
+        ]
+      ],
+      "start": "09:50",
+      "end": "12:10",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:50–12:10",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9385775,
+      "lng": -1.0728719
+    },
+    {
+      "id": "summer-2026-post-v",
+      "editionId": "summer-2026",
+      "number": "V",
+      "name": "Rue du chêne",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:55",
+          "12:15"
+        ]
+      ],
+      "start": "09:55",
+      "end": "12:15",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:55–12:15",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9411075,
+      "lng": -1.0737013
+    },
+    {
+      "id": "summer-2026-post-w",
+      "editionId": "summer-2026",
+      "number": "W",
+      "name": "Rue des Gatolières",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:55",
+          "12:20"
+        ]
+      ],
+      "start": "09:55",
+      "end": "12:20",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:55–12:20",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9426676,
+      "lng": -1.0750477
+    },
+    {
+      "id": "summer-2026-post-x",
+      "editionId": "summer-2026",
+      "number": "X",
+      "name": "Rue du Verdien",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:55",
+          "12:25"
+        ]
+      ],
+      "start": "09:55",
+      "end": "12:25",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:55–12:25",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.943333,
+      "lng": -1.0729355
+    },
+    {
+      "id": "summer-2026-post-y",
+      "editionId": "summer-2026",
+      "number": "Y",
+      "name": "Rue des Bois (arrivée)",
+      "required": 2,
+      "timeSlots": [
+        [
+          "09:55",
+          "12:30"
+        ]
+      ],
+      "start": "09:55",
+      "end": "12:30",
+      "description": "Besoin Été 2026",
+      "instructions": "Présence prévue : 09:55–12:30",
+      "courseIds": [],
+      "publicVisible": false,
+      "lat": 46.9438225,
+      "lng": -1.0724085
+    }
+  ],
+  "aidStations": [
+    {
+      "id": "summer-2026-aid-1",
+      "editionId": "summer-2026",
+      "number": "1",
+      "name": "Ravito 1",
+      "visible": true,
+      "lat": 46.9481968,
+      "lng": -1.036488,
+      "courseIds": [
+        "summer-17",
+        "summer-42"
+      ],
+      "postId": "summer-2026-post-e",
+      "information": "Ravito 1:  17/42"
+    },
+    {
+      "id": "summer-2026-aid-2",
+      "editionId": "summer-2026",
+      "number": "2",
+      "name": "Ravito 2",
+      "visible": true,
+      "lat": 46.9335269,
+      "lng": -1.0138144,
+      "courseIds": [
+        "summer-26",
+        "summer-42"
+      ],
+      "postId": "summer-2026-post-i",
+      "information": "Ravito 2  : 26/42"
+    },
+    {
+      "id": "summer-2026-aid-3",
+      "editionId": "summer-2026",
+      "number": "3",
+      "name": "Ravito 3",
+      "visible": true,
+      "lat": 46.9164535,
+      "lng": -1.0372451,
+      "courseIds": [
+        "summer-26",
+        "summer-42"
+      ],
+      "postId": "summer-2026-post-m",
+      "information": "Ravito 3 : 26/42"
+    },
+    {
+      "id": "summer-2026-aid-4",
+      "editionId": "summer-2026",
+      "number": "4",
+      "name": "Ravito 4",
+      "visible": true,
+      "lat": 46.9362429,
+      "lng": -1.0594302,
+      "courseIds": [
+        "summer-17",
+        "summer-26",
+        "summer-42"
+      ],
+      "postId": "summer-2026-post-s",
+      "information": "Ravito 4 (liquide) : 17/26/42"
+    }
+  ],
+  "owners": [],
+  "parcels": [],
+  "equipment": [],
+  "providers": [],
+  "messages": [],
+  "mapElements": [],
+  "equipmentTypes": [
+    {
+      "id": "barrier",
+      "name": "Barrière",
+      "equipmentGroup": "Sur site",
+      "width": 2,
+      "depth": 0.2,
+      "height": 1.1,
+      "color": "#94a3b8"
+    },
+    {
+      "id": "arch",
+      "name": "Arche",
+      "equipmentGroup": "Sur site",
+      "width": 6,
+      "depth": 1,
+      "height": 4,
+      "color": "#f97316"
+    },
+    {
+      "id": "water",
+      "name": "Point d’eau",
+      "equipmentGroup": "Ravitaillement",
+      "width": 1,
+      "depth": 1,
+      "height": 1,
+      "color": "#0ea5e9"
+    },
+    {
+      "id": "power",
+      "name": "Point électrique",
+      "equipmentGroup": "Sur site",
+      "width": 0.5,
+      "depth": 0.5,
+      "height": 1,
+      "color": "#eab308"
+    },
+    {
+      "id": "tent33",
+      "name": "Barnum 3 × 3",
+      "equipmentGroup": "Sur site",
+      "width": 3,
+      "depth": 3,
+      "height": 3,
+      "color": "#f8fafc"
+    },
+    {
+      "id": "tent44",
+      "name": "Barnum 4 × 4",
+      "equipmentGroup": "Sur site",
+      "width": 4,
+      "depth": 4,
+      "height": 3,
+      "color": "#f8fafc"
+    },
+    {
+      "id": "tent63",
+      "name": "Barnum 6 × 3",
+      "equipmentGroup": "Sur site",
+      "width": 6,
+      "depth": 3,
+      "height": 3,
+      "color": "#f8fafc"
+    },
+    {
+      "id": "tent64",
+      "name": "Barnum 6 × 4",
+      "equipmentGroup": "Sur site",
+      "width": 6,
+      "depth": 4,
+      "height": 3,
+      "color": "#f8fafc"
+    },
+    {
+      "id": "podium",
+      "name": "Podium 8 × 4",
+      "equipmentGroup": "Sur site",
+      "width": 8,
+      "depth": 4,
+      "height": 1,
+      "color": "#64748b"
+    }
+  ],
+  "providerTypes": [
+    {
+      "id": "photographer",
+      "name": "Photographe"
+    },
+    {
+      "id": "sound",
+      "name": "Sono"
+    },
+    {
+      "id": "rescue",
+      "name": "Secouristes"
+    },
+    {
+      "id": "doctor",
+      "name": "Médecin"
+    },
+    {
+      "id": "timing",
+      "name": "Chronométrage"
+    },
+    {
+      "id": "electrician",
+      "name": "Électricien"
+    },
+    {
+      "id": "food",
+      "name": "Restauration"
+    }
+  ],
+  "settings": {
+    "cadastreUrl": "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+    "parcelApi": "https://apicarto.ign.fr/api/cadastre/parcelle"
+  }
+}

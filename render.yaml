@@ -1,0 +1,29 @@
+# SQLite requires a paid service with a persistent disk.
+services:
+  - type: web
+    name: gaubretrail
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm test && npm run build
+    startCommand: npm start -- --hostname 0.0.0.0
+    healthCheckPath: /api/session
+    disk:
+      name: gaubretrail-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24.15.0
+      - key: NODE_ENV
+        value: production
+      - key: GAUBRE_DATABASE_PATH
+        value: /var/data/gaubretrail.sqlite
+      - key: GAUBRE_ADMIN_USERNAME
+        value: organisation
+      - key: GAUBRE_ADMIN_NAME
+        value: Organisation GaubreTrail
+      - key: GAUBRE_ADMIN_PASSWORD_HASH
+        sync: false
+      - key: GAUBRE_APP_ORIGIN
+        sync: false
