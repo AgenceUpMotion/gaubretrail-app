@@ -8,6 +8,17 @@ body {
   display: contents;
 }
 
+/* MapLibre positions markers from the map origin using an inline transform.
+   Custom button styles must not put them back into the normal document flow. */
+.maplibregl-marker.org-marker,
+.maplibregl-marker.staff-marker,
+.maplibregl-marker.sign-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: box-shadow .15s ease;
+}
+
 /* The React shell wraps the legacy map siblings. display: contents does not
    remove that wrapper from CSS child selectors. */
 body.portal-view #next-app-shell > .workspace,
