@@ -143,17 +143,17 @@ async function loadLandscape(){
   if(status)status.textContent='Chargement des arbres et bâtiments 3D…';
   let data,fromCache=false;
   try{
-    const cached=JSON.parse(localStorage.getItem('gaubretrail-landscape-v5'));
+    const cached=JSON.parse(localStorage.getItem('gaubretrail-landscape-v6'));
     if(cached?.savedAt>Date.now()-7*86400000 && cached.data){data=cached.data;fromCache=true;}
   }catch(_error){}
   try{
     if(!data){
       data=await fetchLandscape(COURSE_BOUNDS,EVENT_CENTER);
-      try{localStorage.setItem('gaubretrail-landscape-v5',JSON.stringify({savedAt:Date.now(),data}));}catch(_error){}
+      try{localStorage.setItem('gaubretrail-landscape-v6',JSON.stringify({savedAt:Date.now(),data}));}catch(_error){}
     }
   }catch(error){
-    console.warn('Données paysagères OSM indisponibles, utilisation de la maquette de secours.',error);
-    data=fallbackLandscape(EVENT_CENTER);
+    console.warn('Données paysagères OSM indisponibles, conservation du site cartographié localement.',error);
+    data=fallbackLandscape();
   }
   data.buildings=data.buildings.filter(b=>!siteBuildingIds.has(b.id));
   const footprints=data.buildings.filter(b=>b.footprint?.length>3);
@@ -165,7 +165,7 @@ async function loadLandscape(){
   map.addLayer(landscapeLayer,findFirstLabelLayer());
   raiseOperationalLayers();
   if(status){
-    const suffix=data.fallback?' · mode de secours':'';
+    const suffix=data.fallback?' · données OSM supplémentaires indisponibles':'';
     const cache=fromCache?' · données mémorisées':'';
     status.textContent=`Site principal détaillé sur 250 m · ${data.trees.length.toLocaleString('fr-FR')} arbres · ${data.buildings.length.toLocaleString('fr-FR')} bâtiments${suffix}${cache}`;
   }
@@ -224,7 +224,12 @@ function stylizeDiorama(){
 
 function addTerrain(){
   if (!map.getSource('gaubre-terrain')) {
-    map.addSource('gaubre-terrain', {type:'raster-dem', url:'https://demotiles.maplibre.org/terrain-tiles/tiles.json', tileSize:256});
+    map.addSource('gaubre-terrain', {
+      type:'raster-dem',
+      tiles:['https://elevation-tiles-prod.s3.amazonaws.com/terrarium/{z}/{x}/{y}.png'],
+      encoding:'terrarium', tileSize:256, maxzoom:15,
+      attribution:'Relief : <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Mapzen / sources altimétriques</a>',
+    });
   }
   map.setTerrain({source:'gaubre-terrain', exaggeration:terrainExaggeration});
   if (!map.getLayer('gaubre-hillshade')) {

@@ -101,19 +101,9 @@ export async function fetchLandscape(bounds,focus){
   }finally{clearTimeout(timeout);}
 }
 
-export function fallbackLandscape(center){
-  const rand=randomFactory(42026),trees=[],buildings=[];
-  const lonMeter=1/(111320*Math.cos(center[1]*Math.PI/180)),latMeter=1/111320;
-  for(let i=0;i<950;i++){
-    const angle=rand()*Math.PI*2,radius=180+rand()*1800;
-    const height=6+rand()*10;
-    trees.push({lon:center[0]+Math.cos(angle)*radius*lonMeter,lat:center[1]+Math.sin(angle)*radius*latMeter,height,radius:height*(.22+rand()*.1),tone:rand()});
-  }
-  for(let i=0;i<180;i++){
-    const angle=rand()*Math.PI*2,radius=180+rand()*750;
-    buildings.push({lon:center[0]+Math.cos(angle)*radius*lonMeter,lat:center[1]+Math.sin(angle)*radius*latMeter,width:7+rand()*15,depth:6+rand()*10,height:5+rand()*7,rotation:rand()*Math.PI});
-  }
-  return {trees,buildings,approximateTrees:true,fallback:true};
+export function fallbackLandscape(){
+  // Keep the mapped local site, but never invent geographic features on failure.
+  return {trees:[],buildings:[],approximateTrees:false,fallback:true};
 }
 
 function addBox(group,material,w,d,h,x=0,y=0,z=0,rotation=0){
