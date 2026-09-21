@@ -8,6 +8,16 @@ body {
   display: contents;
 }
 
+/* Navigation: keep a soft green hover state instead of the default white. */
+#organization #orgNav .nav-item:hover:not(.active) {
+  background: #e7eee3 !important;
+  color: #204f3d !important;
+}
+
+#organization #orgNav .nav-item:hover:not(.active) .nav-item-icon {
+  color: #235e48;
+}
+
 /* MapLibre positions markers from the map origin using an inline transform.
    Custom button styles must not put them back into the normal document flow. */
 .maplibregl-marker.org-marker,
