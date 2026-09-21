@@ -3,7 +3,15 @@ import assert from 'node:assert/strict';
 import { createStateStore } from '../lib/state-store.mjs';
 import { selectVolunteers, saveVolunteer, editionIds } from '../features/volunteers/model.mjs';
 import { prepareContactImport, exportContacts } from '../contacts.js';
-import { validate } from '../domain.js';
+import { validate, runnerProgressAt, coordinateAtProgress } from '../domain.js';
+
+test('Live simulation positions the first and last runner along a route', () => {
+  const course = { departureTime: '08:00', firstDuration: '01:00', lastDuration: '02:00' };
+  assert.deepEqual(runnerProgressAt(course, 510, 'firstDuration').progress, 0.5);
+  assert.equal(runnerProgressAt(course, 510, 'lastDuration').progress, 0.25);
+  assert.equal(runnerProgressAt(course, 450, 'firstDuration').state, 'before');
+  assert.deepEqual(coordinateAtProgress([[0, 0], [2, 0]], 0.25), [0.5, 0]);
+});
 import { seedState } from './helpers.mjs';
 import { readLocalBackup } from '../lib/local-backup.mjs';
 

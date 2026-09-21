@@ -14,7 +14,23 @@ const validDuration=value=>typeof value==='string'&&/^\d{1,3}:[0-5]\d$/.test(val
 export function durationMinutes(value){const match=String(value??'').match(/^(\d{1,3}):([0-5]\d)$/);return match?Number(match[1])*60+Number(match[2]):NaN;}
 export function clockMinutes(value){if(!validTime(value))return NaN;const [hours,minutes]=value.split(':').map(Number);return hours*60+minutes;}
 export function formatClock(totalMinutes){if(!Number.isFinite(totalMinutes))return '';const rounded=Math.round(totalMinutes),dayOffset=Math.floor(rounded/1440),withinDay=((rounded%1440)+1440)%1440;return {time:`${String(Math.floor(withinDay/60)).padStart(2,'0')}:${String(withinDay%60).padStart(2,'0')}`,dayOffset};}
+// Planning simulation only: it estimates a constant pace, never GPS tracking.
+export function runnerProgressAt(course,atMinutes,durationField){
+  const departure=clockMinutes(course?.departureTime),duration=durationMinutes(course?.[durationField]);
+  if(!Number.isFinite(atMinutes)||!Number.isFinite(departure)||!Number.isFinite(duration))return null;
+  const raw=(atMinutes-departure)/duration;
+  return {state:raw<0?'before':raw>1?'finished':'running',progress:Math.max(0,Math.min(1,raw)),departure,duration};
+}
 const segmentKm=(a,b)=>{const rad=Math.PI/180,h=Math.sin((b[1]-a[1])*rad/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin((b[0]-a[0])*rad/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(h)));};
+export function coordinateAtProgress(coords,progress){
+  if(!Array.isArray(coords)||coords.length<2||!Number.isFinite(progress))return null;
+  const lengths=[];let total=0;
+  for(let i=1;i<coords.length;i++){const length=segmentKm(coords[i-1],coords[i]);lengths.push(length);total+=length;}
+  if(!total)return coords[0]?.slice(0,2)||null;
+  let target=Math.max(0,Math.min(1,progress))*total;
+  for(let i=1;i<coords.length;i++){const length=lengths[i-1];if(target<=length||i===coords.length-1){const ratio=length?target/length:0,a=coords[i-1],b=coords[i];return [a[0]+(b[0]-a[0])*ratio,a[1]+(b[1]-a[1])*ratio];}target-=length;}
+  return coords.at(-1)?.slice(0,2)||null;
+}
 // Return the progress (0..1) and distance of the closest point on a course trace.
 export function routePosition(coords,point){
   if(!Array.isArray(coords)||coords.length<2||!coordinates(point))return null;
