@@ -12,7 +12,8 @@
     "setup": "node scripts/setup-server.mjs",
     "reset:password": "node scripts/reset-admin-password.mjs",
     "repair:encoding": "node --use-system-ca --env-file-if-exists=.env.local scripts/repair-encoding.mjs",
-    "import:state": "node --use-system-ca --env-file-if-exists=.env.local scripts/import-state.mjs"
+    "import:state": "node --use-system-ca --env-file-if-exists=.env.local scripts/import-state.mjs",
+    "import:kml": "node --use-system-ca --env-file-if-exists=.env.local scripts/import-kml-edition.mjs"
   },
   "engines": {
     "node": ">=24.15.0 <25"

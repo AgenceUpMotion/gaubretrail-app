@@ -66,6 +66,11 @@
 .assignment-table .assignment-instructions { min-width: 240px; max-width: 380px; white-space: pre-wrap; line-height: 1.45; }
 .assignment-table .visibility-toggle { display: inline-block; padding: 8px 12px; border: 1px solid; border-radius: 7px; text-align: center; }
 .assignment-conflict { display: block; width: max-content; margin-top: 6px; padding: 3px 7px; border-radius: 5px; background: #fff0ed; color: #a12a20; font-size: 10px; font-weight: 750; }
+.planning-conflict-alert { margin: 0 0 16px; padding: 15px 18px; border: 1px solid #e8a39a; border-left: 5px solid #c94738; border-radius: 10px; background: #fff4f1; color: #70271f; }
+.planning-conflict-alert strong { display: block; font-size: 15px; }
+.planning-conflict-alert p { margin: 5px 0 8px; font-size: 13px; }
+.planning-conflict-alert ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.planning-conflict-alert li + li { margin-top: 4px; }
 .assignment-group + .assignment-group .assignment-group-header td { border-top: 14px solid #f4f6f1 !important; }
 #organization .assignment-group-header td { padding: 12px 14px; background: #121212; color: white; vertical-align: middle; }
 #organization .assignment-group-header:hover td { background: #121212; }

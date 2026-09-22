@@ -144,14 +144,6 @@ function pedimentGeometry(w,d,h){
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(vertices,3));geometry.setIndex(indices);geometry.computeVertexNormals();return geometry;
 }
 
-function addTent(group,x,y,w,d,color,rotation=0){
-  const canvas=new THREE.MeshStandardMaterial({color,roughness:.82,flatShading:true});
-  const frame=new THREE.MeshStandardMaterial({color:0xe9eee8,roughness:.7});
-  addBox(group,frame,w,.12,.12,x,y-d/2,2.25,rotation);addBox(group,frame,w,.12,.12,x,y+d/2,2.25,rotation);
-  for(const sx of [-1,1])for(const sy of [-1,1])addBox(group,frame,.12,.12,2.3,x+sx*w*.48,y+sy*d*.48,1.15,rotation);
-  const roof=new THREE.Mesh(new THREE.ConeGeometry(1,1,4),canvas);roof.geometry.rotateX(Math.PI/2);roof.geometry.rotateZ(Math.PI/4);roof.scale.set(w*.72,d*.72,1.25);roof.position.set(x,y,2.85);roof.rotation.z=rotation;group.add(roof);
-}
-
 function createCastleModel(){
   const group=new THREE.Group();group.name='Château de Landebaudière';group.rotation.z=THREE.MathUtils.degToRad(64.35);
   const wall=new THREE.MeshStandardMaterial({color:0xe5dcc6,roughness:.94,flatShading:true});
@@ -234,24 +226,17 @@ function createLandebaudiereParking(){
   return group;
 }
 
-function createEventModel(){
-  const group=new THREE.Group();group.name='Village départ et arrivée';group.rotation.z=THREE.MathUtils.degToRad(-17);
-  const orange=new THREE.MeshStandardMaterial({color:0xf36c21,roughness:.75});
-  const blue=new THREE.MeshStandardMaterial({color:0x1769d2,roughness:.75});
-  const dark=new THREE.MeshStandardMaterial({color:0x4d5559,roughness:.9});
-  const straw=new THREE.MeshStandardMaterial({color:0xc9a85e,roughness:1});
-  addBox(group,dark,10,6,1.1,-53,58,.55);addBox(group,dark,7,1.2,2.5,-53,60.5,2.35);
-  addTent(group,-5,67,18,6,0x1769d2);addTent(group,15,67,18,6,0x1769d2);addTent(group,42,62,6,3,0xf4f0df);
-  addTent(group,66,40,4,4,0xf4f0df);addTent(group,66,34,4,4,0xf4f0df);addTent(group,70,16,4,4,0xf4f0df);addTent(group,70,7,3,3,0xf4f0df);addTent(group,72,-8,6,4,0x1769d2);
-  addTent(group,-35,-7,3,3,0xf4f0df);addTent(group,-15,-8,3,3,0xf4f0df);addTent(group,1,-8,3,3,0xf4f0df);addTent(group,-65,-36,8,4,0xf4f0df);addTent(group,-6,-48,6,3,0xf4f0df);addTent(group,-20,-62,4,4,0xf4f0df);
-  addBox(group,orange,.8,.8,5.8,-3,0,2.9);addBox(group,orange,.8,.8,5.8,3,0,2.9);addBox(group,orange,6.8,.8,.9,0,0,5.45);
-  addBox(group,orange,1.8,.4,.4,0,0,6.25,0);addBox(group,straw,34,38,.14,-45,-25,.07);
-  for(const x of [-1,9])addBox(group,orange,.18,92,.12,x,-19,.09);
-  for(let i=0;i<14;i++){
-    const angle=i*.85,radius=8+(i%4)*4,x=-10+Math.cos(angle)*radius,y=30+Math.sin(angle)*radius;
-    const table=new THREE.Mesh(new THREE.CylinderGeometry(1.05,1.05,.12,12),dark);table.geometry.rotateX(Math.PI/2);table.position.set(x,y,1.05);group.add(table);addBox(group,dark,.18,.18,1,x,y,.5);
-  }
-  addBox(group,blue,22,.6,1.2,8,70,1.1);addBox(group,orange,18,.35,.75,25,-55,.6);
+function createFinishArchModel(){
+  const group=new THREE.Group();group.name='Arche d’arrivée';group.rotation.z=THREE.MathUtils.degToRad(66);
+  const purple=new THREE.MeshStandardMaterial({color:0x333399,roughness:.68,metalness:.08});
+  const magenta=new THREE.MeshStandardMaterial({color:0xd900ae,roughness:.68,metalness:.08});
+  const white=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.72});
+  addBox(group,purple,.65,1,5.2,-3.45,0,2.6);
+  addBox(group,purple,.65,1,5.2,3.45,0,2.6);
+  addBox(group,magenta,7.55,1,.85,0,0,5.25);
+  addBox(group,white,4.8,1.04,.42,0,0,5.28);
+  addBox(group,magenta,1.15,1.25,.22,-3.45,0,.11);
+  addBox(group,magenta,1.15,1.25,.22,3.45,0,.11);
   return group;
 }
 
@@ -265,8 +250,8 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
       this.unit=this.origin.meterInMercatorCoordinateUnits();
       this.scene.add(new THREE.HemisphereLight(0xe9f3ff,0x4c5734,1.65));
       const sun=new THREE.DirectionalLight(0xffefd0,2.45);sun.position.set(-280,-420,700);this.scene.add(sun);
-      this.castle=createCastleModel();this.eventVillage=createEventModel();this.hall=createLandebaudiereHall();this.parking=createLandebaudiereParking();
-      this.scene.add(this.castle,this.eventVillage,this.hall,this.parking);
+      this.castle=createCastleModel();this.hall=createLandebaudiereHall();this.parking=createLandebaudiereParking();this.finishArch=createFinishArchModel();
+      this.scene.add(this.castle,this.hall,this.parking,this.finishArch);
       const trunkGeometry=new THREE.CylinderGeometry(.2,.38,1,5);trunkGeometry.rotateX(Math.PI/2);
       const trunkMaterial=new THREE.MeshStandardMaterial({color:0x675040,roughness:1});
       const crownGeometry=new THREE.IcosahedronGeometry(1,1);
@@ -314,8 +299,9 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
         if(this.lastElevations[index]!==elevation){changed=true;this.lastElevations[index]=elevation;}index++;
         const [x,y,z]=this.localPosition(coordinate[0],coordinate[1],elevation);group.position.set(x,y,z);group.userData.terrainReady=elevation!==null;
       };
-      placeLandmark(this.castle,landmarks.castle);placeLandmark(this.eventVillage,landmarks.event);
+      placeLandmark(this.castle,landmarks.castle);
       placeLandmark(this.hall,landmarks.hall);placeLandmark(this.parking,landmarks.parking);
+      placeLandmark(this.finishArch,landmarks.finish);
       for(const mesh of [this.trunks,this.crowns,this.walls,this.roofs])mesh.instanceMatrix.needsUpdate=true;
       if(this.crowns.instanceColor)this.crowns.instanceColor.needsUpdate=true;
       if(changed)this.map.triggerRepaint();
@@ -326,7 +312,7 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
       this.castle.visible=this.buildingsVisible&&this.castle.userData.terrainReady!==false;
       this.hall.visible=this.buildingsVisible&&this.hall.userData.terrainReady!==false;
       this.parking.visible=this.buildingsVisible&&this.parking.userData.terrainReady!==false;
-      this.eventVillage.visible=this.eventVisible&&this.eventVillage.userData.terrainReady!==false;
+      this.finishArch.visible=this.eventVisible&&this.finishArch.userData.terrainReady!==false;
       if(!this.map.getTerrain())return;
       const projection=new THREE.Matrix4().fromArray(args.defaultProjectionData?.mainMatrix||args);
       const transform=new THREE.Matrix4().makeTranslation(this.origin.x,this.origin.y,0).scale(new THREE.Vector3(this.unit,-this.unit,this.unit));
@@ -336,7 +322,7 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
     onRemove(){
       this.map.off('idle',this.update);this.map.off('terrain',this.update);
       for(const mesh of [this.trunks,this.crowns,this.walls,this.roofs]){mesh.geometry.dispose();mesh.material.dispose();mesh.dispose();}
-      for(const group of [this.castle,this.eventVillage,this.hall,this.parking])group.traverse(object=>{if(object.isMesh){object.geometry.dispose();object.material.dispose();}});
+      for(const group of [this.castle,this.hall,this.parking,this.finishArch])group.traverse(object=>{if(object.isMesh){object.geometry.dispose();object.material.dispose();}});
       this.renderer.dispose();
     }
   };

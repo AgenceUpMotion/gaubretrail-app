@@ -26,7 +26,7 @@
   <main class="workspace">
     <aside id="panel" class="panel">
       <div class="panel-heading"><span>⚙</span> Explorer les parcours</div>
-      <p class="panel-intro">Choisissez une distance puis explorez le tracé et le village Gaubre'Trail en relief.</p>
+      <p class="panel-intro">Choisissez une distance puis explorez le tracé en relief.</p>
 
       <section class="panel-section edition-card">
         <label for="editionSelect">Édition affichée</label>
@@ -34,7 +34,7 @@
           <option value="summer">Été 2026</option>
           <option value="winter">Hiver · nocturne</option>
         </select>
-        <small id="editionHint">Parcours estivaux et village de départ.</small>
+        <small id="editionHint">Parcours estivaux.</small>
       </section>
 
       <section id="editionRoutes" class="panel-section">
@@ -63,9 +63,9 @@
         <div class="section-title"><strong>Fond et décor</strong></div>
         <div class="toggles">
           <label><span>Vue satellite</span><input id="satelliteToggle" type="checkbox"></label>
+          <label><span>Plan du village</span><input id="eventToggle" type="checkbox" checked></label>
           <label><span>Arbres Three.js</span><input id="treesToggle" type="checkbox" checked></label>
           <label><span>Bâtiments Three.js</span><input id="buildingsToggle" type="checkbox" checked></label>
-          <label><span>Village Gaubre'Trail</span><input id="eventToggle" type="checkbox" checked></label>
           <label><span>Relief 3D</span><input id="terrainToggle" type="checkbox" checked></label>
         </div>
         <p id="landscapeStatus" class="landscape-status">Chargement de la végétation 3D…</p>

@@ -35,6 +35,12 @@ export function operationalFeatureCollections({ posts = [], aidStations = [], ph
       }),
     },
     points: { type: 'FeatureCollection', features: points.map(record => pointFeature(record, 'point_of_interest', { code: record.number || '', kind: record.kind || '' })) },
+    pointAreas: {
+      type: 'FeatureCollection',
+      features: points.filter(record => ['Polygon', 'MultiPolygon'].includes(record.geometry?.type)).map(record => ({
+        type: 'Feature', properties: { id: record.id, type: 'point_area', name: record.name || '', kind: record.kind || '' }, geometry: record.geometry,
+      })),
+    },
   };
 }
 
@@ -75,6 +81,7 @@ export function ensureOperationalLayers(map) {
   addSource(map, 'gt-aid-stations', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   addSource(map, 'gt-photographers', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   addSource(map, 'gt-points', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  addSource(map, 'gt-point-areas', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 
   addLayer(map, { id: 'gt-post-clusters', type: 'circle', source: 'gt-posts', filter: ['has', 'point_count'], maxzoom: 16, paint: { 'circle-color': '#5c2497', 'circle-radius': ['step', ['get', 'point_count'], 17, 10, 21, 30, 26], 'circle-stroke-color': '#fff', 'circle-stroke-width': 3 } });
   addLayer(map, { id: 'gt-post-cluster-count', type: 'symbol', source: 'gt-posts', filter: ['has', 'point_count'], maxzoom: 16, layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 12, 'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#fff' } });
@@ -90,9 +97,14 @@ export function ensureOperationalLayers(map) {
   addLayer(map, { id: 'gt-aid-station-labels', type: 'symbol', source: 'gt-aid-stations', minzoom: 12, layout: { 'text-field': ['concat', 'R ', ['get', 'code']], 'text-size': 11, 'text-offset': [0, 1.55], 'text-anchor': 'top', 'text-optional': true }, paint: { 'text-color': '#6e3ea0', 'text-halo-color': '#fff', 'text-halo-width': 1.5 } });
   addLayer(map, { id: 'gt-photographers', type: 'circle', source: 'gt-photographers', minzoom: 11, paint: { 'circle-color': '#6e3ea0', 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 11, 15, 14], 'circle-stroke-color': '#fff', 'circle-stroke-width': 3 } });
   if (hasOperationalIcons) addLayer(map, { id: 'gt-photographer-icons', type: 'symbol', source: 'gt-photographers', minzoom: 11, layout: { 'icon-image': 'gt-camera-icon', 'icon-size': ['interpolate', ['linear'], ['zoom'], 11, .055, 15, .075], 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
+  addLayer(map, { id: 'gt-point-areas-fill', type: 'fill', source: 'gt-point-areas', minzoom: 9, paint: { 'fill-color': '#6e3ea0', 'fill-opacity': .14 } });
+  addLayer(map, { id: 'gt-point-areas-outline', type: 'line', source: 'gt-point-areas', minzoom: 9, paint: { 'line-color': '#6e3ea0', 'line-width': 2.5, 'line-opacity': .82 } });
   addLayer(map, { id: 'gt-points', type: 'circle', source: 'gt-points', minzoom: 11, paint: { 'circle-color': '#4b5563', 'circle-radius': 6, 'circle-stroke-color': '#fff', 'circle-stroke-width': 2 } });
 }
 
 export function setOperationalData(map, collections) {
-  for (const [name, data] of Object.entries(collections)) map.getSource(`gt-${name === 'aidStations' ? 'aid-stations' : name}`)?.setData(data);
+  for (const [name, data] of Object.entries(collections)) {
+    const source = name === 'aidStations' ? 'aid-stations' : name === 'pointAreas' ? 'point-areas' : name;
+    map.getSource(`gt-${source}`)?.setData(data);
+  }
 }

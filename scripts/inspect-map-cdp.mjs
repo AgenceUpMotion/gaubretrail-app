@@ -9,9 +9,13 @@ let id=0;const pending=new Map();
 socket.addEventListener('message',event=>{const message=JSON.parse(event.data);if(message.id){const task=pending.get(message.id);if(!task)return;pending.delete(message.id);message.error?task.reject(Error(message.error.message)):task.resolve(message.result);}});
 const send=(method,params={})=>new Promise((resolve,reject)=>{const requestId=++id;pending.set(requestId,{resolve,reject});socket.send(JSON.stringify({id:requestId,method,params}));});
 await send('Runtime.enable');
+if(process.argv.includes('--village')){
+  await send('Runtime.evaluate',{expression:`window.__gaubretrailMap?.jumpTo({center:[-1.0714238,46.9448641],zoom:18,pitch:45,bearing:-17})`});
+  await new Promise(resolve=>setTimeout(resolve,5000));
+}
 const result=await send('Runtime.evaluate',{returnByValue:true,expression:`(()=>{const map=window.__gaubretrailMap;return JSON.stringify({
   workerUrl:window.__maplibreWorkerUrl,
-  map:map?{loaded:map.loaded(),styleLoaded:map.isStyleLoaded(),tilesLoaded:map.areTilesLoaded(),sources:Object.fromEntries(Object.keys(map.getStyle().sources).map(id=>[id,map.isSourceLoaded(id)])),routeFeatures:map.querySourceFeatures('route-42').length}:null
+  map:map?{loaded:map.loaded(),styleLoaded:map.isStyleLoaded(),tilesLoaded:map.areTilesLoaded(),sources:Object.fromEntries(Object.keys(map.getStyle().sources).map(id=>[id,map.isSourceLoaded(id)])),routeFeatures:map.querySourceFeatures('route-42').length,villageFeatures:map.querySourceFeatures('event-village').length,villageLayers:map.getStyle().layers.filter(layer=>layer.id.startsWith('event-village')).map(layer=>({id:layer.id,visibility:layer.layout?.visibility||'visible'})),villageSample:map.getSource('event-village')?.serialize()?.data?.features?.slice(0,2)}:null
 })})()`});
 process.stdout.write(result.result.value+'\n');
 const screenshot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
