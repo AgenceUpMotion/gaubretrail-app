@@ -1,11 +1,11 @@
 import { publicData } from '../domain.js';
 
-// Preserve the former PHP publication consent during backend migration.
-// The shared projection strips private fields; consent is enforced here first.
+// A post controls its publication. Active people assigned to a published post
+// are therefore included; personal fields remain stripped by publicData.
 export function publicState(state) {
   const result = publicData({
     ...state,
-    volunteers: state.volunteers.filter(volunteer => volunteer.publicVisible === true),
+    volunteers: state.volunteers.filter(volunteer => volunteer.active),
     // Operations and equipment were not exposed by the PHP public endpoint.
     operations: {},
   });

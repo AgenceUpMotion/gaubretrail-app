@@ -6,6 +6,7 @@ export function createMapHost() {
   let doubleClickEnabled = true;
   const sources = new Map();
   const layers = new Map();
+  const images = new Map();
   const events = [];
   const overlays = new Set();
   const canvas = document.createElement('canvas');
@@ -58,8 +59,11 @@ export function createMapHost() {
     },
     removeSource(id) { sources.delete(id); if (real?.getSource(id)) real.removeSource(id); },
     getLayer: (id) => real ? real.getLayer(id) : layers.get(id),
+    hasImage: (id) => real ? real.hasImage(id) : images.has(id),
+    addImage(id, image, options) { images.set(id, { image, options }); if (real && !real.hasImage(id)) real.addImage(id, image, options); },
     addLayer(layer) { layers.set(layer.id, layer); if (real && !real.getLayer(layer.id)) real.addLayer(layer); },
     removeLayer(id) { layers.delete(id); if (real?.getLayer(id)) real.removeLayer(id); },
+    moveLayer(id, beforeId) { if (real?.getLayer(id)) real.moveLayer(id, beforeId); },
     setLayoutProperty(id, key, value) {
       const layer = layers.get(id);
       if (layer) { layer.layout ||= {}; layer.layout[key] = value; }
@@ -108,6 +112,10 @@ export function createMapHost() {
       for (const [id, source] of sources) {
         try { if (!real.getSource(id)) real.addSource(id, source.options); }
         catch (error) { console.warn(`Source cartographique ignorée : ${id}`, error); }
+      }
+      for (const [id, image] of images) {
+        try { if (!real.hasImage(id)) real.addImage(id, image.image, image.options); }
+        catch (error) { console.warn(`Icône cartographique ignorée : ${id}`, error); }
       }
       for (const layer of layers.values()) {
         try { if (!real.getLayer(layer.id)) real.addLayer(layer); }

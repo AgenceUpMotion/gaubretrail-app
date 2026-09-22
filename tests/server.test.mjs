@@ -58,9 +58,9 @@ test('Public API: publication consent and allowlists keep private fields private
     const response = await createApi({ storage: () => storage, env: {} })(new Request('http://localhost/api/public'), 'public');
     assert.equal(response.status, 200);
     const data = await response.json();
-    assert.deepEqual(data.state.volunteers.map(volunteer => volunteer.id), ['visible']);
-    assert.equal(data.state.assignments.length, 1);
-    assert.doesNotMatch(JSON.stringify(data), /SECRET_|PRIVATE_|INACTIVE_NAME/);
+    assert.deepEqual(data.state.volunteers.map(volunteer => volunteer.id), ['visible', 'private']);
+    assert.equal(data.state.assignments.length, 2);
+    assert.doesNotMatch(JSON.stringify(data), /SECRET_PHONE|SECRET_EMAIL|SECRET_NOTES|INACTIVE_NAME/);
     assert.deepEqual(data.state.owners, []);
   } finally { storage.close(); }
 });

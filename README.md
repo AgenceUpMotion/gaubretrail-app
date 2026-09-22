@@ -27,6 +27,22 @@ npm run test:http
 npm start
 ```
 
+## Supabase
+
+L’application peut utiliser Supabase sans changer son API ni exposer la base au navigateur. Créez un projet Supabase, exécutez la migration `supabase/migrations/20260921000000_gaubretrail_state.sql` dans le SQL Editor, puis ajoutez les variables suivantes dans `.env.local` et sur l’hébergeur :
+
+```sh
+GAUBRE_STORAGE_DRIVER=supabase
+SUPABASE_URL=https://votre-projet.supabase.co
+SUPABASE_SECRET_KEY=votre-cle-secret
+```
+
+Au premier démarrage, l’état initial de `data/organization.json` est inséré sans écraser une base déjà initialisée. Pour migrer une sauvegarde existante, configurez Supabase puis lancez `npm run import:state -- chemin/vers/sauvegarde-privee.json`. La clé `SUPABASE_SECRET_KEY` est strictement serveur : ne la placez jamais dans une variable `NEXT_PUBLIC_*` ni dans un fichier versionné. L’ancien nom `SUPABASE_SERVICE_ROLE_KEY` reste accepté temporairement pour les projets utilisant les clés historiques.
+
+Si le mot de passe organisateur est perdu, exécutez `npm run reset:password`. La commande remplace uniquement son hash dans `.env.local`, invalide les sessions existantes et affiche le nouveau mot de passe une seule fois.
+
+Pour corriger des caractères mal encodés après un ancien import (par exemple `PrÃ©sence`), exécutez `npm run repair:encoding`. La commande ne modifie que les textes concernés et conserve l’état précédent avant sauvegarde.
+
 ## Architecture
 
 Pour Render, utiliser le Blueprint [render.yaml](render.yaml) et suivre [docs/render.md](docs/render.md). Le stockage SQLite nécessite un service avec disque persistant.

@@ -17,7 +17,7 @@ export function mountVolunteers(container) {
   container.replaceChildren();
   const root = createRoot(container);
   return {
-    render(props) { root.render(<StrictMode><FeatureBoundary><VolunteersPage key={props.editionId} {...props}/></FeatureBoundary></StrictMode>); },
+    render(props) { root.render(<StrictMode><FeatureBoundary><VolunteersPage key={`${props.editionId}-${props.organizationOnly ? 'organization' : 'volunteers'}`} {...props}/></FeatureBoundary></StrictMode>); },
     unmount() { root.unmount(); },
   };
 }

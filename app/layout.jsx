@@ -6,6 +6,7 @@ import '../volunteer-table.css';
 import '../owner-status.css';
 import '../dashboard.css';
 import '../brand.css';
+import './modern.css';
 
 export const metadata = {
   icons: { icon: '/assets/logo-gaubretrail.svg' },
@@ -17,7 +18,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#ffffff',
+  themeColor: '#333399',
 };
 
 export default function RootLayout({ children }) {

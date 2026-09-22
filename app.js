@@ -89,7 +89,9 @@ map.addControl(new maplibregl.ScaleControl({maxWidth:120, unit:'metric'}), 'bott
 let selectedRoute = new URLSearchParams(location.search).get('route') || '42';
 let eventEnabled = true;
 let terrainEnabled = true;
-let terrainExaggeration = 3.5;
+// The Vendée is naturally gentle: a stronger vertical scale keeps valleys and
+// rises readable from the 3D camera without changing the underlying terrain.
+let terrainExaggeration = 4;
 let landscapeLayer = null;
 let management = null;
 let activeEdition = 'summer';
@@ -109,6 +111,9 @@ export function raiseOperationalLayers(){
 // Do not wait for every remote tile: the style is enough to install local routes.
 map.once('style.load', async () => {
   try{
+  // The base style ships with its own 3D buildings. Hide them before adding
+  // our controlled Three.js / local layers, otherwise the same buildings stack.
+  stylizeDiorama();
   addTerrain();
   await addSiteContext();
   await addRoutes();
@@ -155,10 +160,10 @@ async function loadLandscape(){
     console.warn('Données paysagères OSM indisponibles, conservation du site cartographié localement.',error);
     data=fallbackLandscape();
   }
-  data.buildings=data.buildings.filter(b=>!siteBuildingIds.has(b.id));
-  const footprints=data.buildings.filter(b=>b.footprint?.length>3);
-  if(footprints.length){map.addSource('osm-building-footprints',{type:'geojson',data:{type:'FeatureCollection',features:footprints.map(b=>({type:'Feature',properties:{height:b.height},geometry:{type:'Polygon',coordinates:[b.footprint]}}))}});map.addLayer({id:'osm-building-footprints',type:'fill-extrusion',source:'osm-building-footprints',paint:{'fill-extrusion-color':'#dcc4a9','fill-extrusion-height':['get','height'],'fill-extrusion-opacity':1}},findFirstLabelLayer());}
-  landscapeLayer=createLandscapeLayer({...data,buildings:data.buildings.filter(b=>!b.footprint)},maplibregl,{castle:CASTLE,event:EVENT_CENTER,hall:LANDEBAUDIERE_HALL,parking:LANDEBAUDIERE_PARKING});
+  // Building geometry is rendered exclusively by the Three.js custom layer.
+  // Rendering the same OSM footprints as MapLibre extrusions caused two 3D
+  // buildings to occupy the same location.
+  landscapeLayer=createLandscapeLayer(data,maplibregl,{castle:CASTLE,event:EVENT_CENTER,hall:LANDEBAUDIERE_HALL,parking:LANDEBAUDIERE_PARKING});
   landscapeLayer.eventVisible=eventEnabled&&activeEdition==='summer';
   landscapeLayer.treesVisible=document.querySelector('#treesToggle').checked;
   landscapeLayer.buildingsVisible=document.querySelector('#buildingsToggle').checked;
@@ -176,7 +181,6 @@ async function addSiteContext(){
     map.addLayer({id:'site-surfaces',type:'fill',source:'site-context',filter:['all',['==',['geometry-type'],'Polygon'],['!=',['get','kind'],'building']],paint:{'fill-color':['match',['get','kind'],'parking','#aaa99e','water','#a9d4df','wood','#6f8c58','#a9bd85'],'fill-opacity':.9}},findFirstLabelLayer());
     map.addLayer({id:'site-roads',type:'line',source:'site-context',filter:['==',['get','kind'],'road'],paint:{'line-color':'#fff7e5','line-width':['interpolate',['linear'],['zoom'],14,2,19,12]}},findFirstLabelLayer());
     map.addLayer({id:'site-hedges',type:'line',source:'site-context',filter:['==',['get','kind'],'hedge'],paint:{'line-color':'#526c3f','line-width':3}},findFirstLabelLayer());
-    map.addLayer({id:'site-buildings',type:'fill-extrusion',source:'site-context',filter:['all',['==',['get','kind'],'building'],['==',['geometry-type'],'Polygon']],paint:{'fill-extrusion-color':'#d5c5ad','fill-extrusion-height':['get','height'],'fill-extrusion-opacity':1}},findFirstLabelLayer());
   }catch(e){console.warn('Contexte des Tourelles indisponible',e);}
 }
 
@@ -368,7 +372,7 @@ function setEventVisibility(on){
 for(const btn of document.querySelectorAll('.route[data-route]')) btn.addEventListener('click',()=>{if(management){selectedRoute=btn.dataset.route;return;}setRouteVisibility(btn.dataset.route);fitRoute(btn.dataset.route)});
 document.querySelector('#satelliteToggle')?.addEventListener('change',e=>setSatelliteVisibility(e.target.checked));
 document.querySelector('#treesToggle').addEventListener('change',e=>{if(landscapeLayer){landscapeLayer.treesVisible=e.target.checked;map.triggerRepaint();}});
-document.querySelector('#buildingsToggle').addEventListener('change',e=>{if(landscapeLayer){landscapeLayer.buildingsVisible=e.target.checked;map.triggerRepaint();}for(const id of ['site-buildings','osm-building-footprints'])if(map.getLayer(id))map.setLayoutProperty(id,'visibility',e.target.checked?'visible':'none');});
+document.querySelector('#buildingsToggle').addEventListener('change',e=>{if(landscapeLayer){landscapeLayer.buildingsVisible=e.target.checked;map.triggerRepaint();}});
 document.querySelector('#eventToggle').addEventListener('change',e=>setEventVisibility(e.target.checked));
 document.querySelector('#terrainToggle').addEventListener('change',e=>{terrainEnabled=e.target.checked;map.setTerrain(terrainEnabled?{source:'gaubre-terrain',exaggeration:terrainExaggeration}:null); if(map.getLayer('gaubre-hillshade'))map.setLayoutProperty('gaubre-hillshade','visibility',terrainEnabled?'visible':'none');if(landscapeLayer)map.triggerRepaint();});
 const dlg=document.querySelector('#planDialog');

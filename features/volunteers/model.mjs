@@ -8,8 +8,8 @@ export function editionIds(state, volunteer) {
   return assigned.length ? assigned : state.editions.map(edition => edition.id);
 }
 
-export function selectVolunteers(state, editionId, { query = '', status = '', postId = '', sort = 'asc' } = {}) {
-  const rows = state.volunteers.filter(volunteer => editionIds(state, volunteer).includes(editionId)).map(volunteer => {
+export function selectVolunteers(state, editionId, { query = '', status = '', postId = '', sort = 'asc', organizationOnly = false } = {}) {
+  const rows = state.volunteers.filter(volunteer => editionIds(state, volunteer).includes(editionId) && Boolean(volunteer.organizationMember) === organizationOnly).map(volunteer => {
     const assignments = state.assignments.filter(a => a.editionId === editionId && a.volunteerId === volunteer.id);
     const posts = assignments.map(a => state.posts.find(post => post.id === a.postId)).filter(Boolean);
     const postText = posts.map(post => `${post.number} ${post.name}`).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true })).join(' / ');

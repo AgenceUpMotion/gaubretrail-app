@@ -33,13 +33,13 @@ export async function readJson(request, limit = 12 * 1024 * 1024) {
 export function createApi({ storage = getStorage, env = process.env } = {}) {
   return async function handle(request, route) {
     try {
-      const db = storage();
+      const db = await storage();
       const username = env.GAUBRE_ADMIN_USERNAME || 'organisation';
       const hash = env.GAUBRE_ADMIN_PASSWORD_HASH;
       const configured = validPasswordHash(hash);
       const credentialHash = createHash('sha256').update(`${username}:${hash || ''}`).digest('hex');
       const token = request.headers.get('cookie')?.split(';').map(part => part.trim()).find(part => part.startsWith(COOKIE + '='))?.slice(COOKIE.length + 1);
-      const admin = configured && db.hasSession(token, credentialHash);
+      const admin = configured && await db.hasSession(token, credentialHash);
       const method = request.method;
       const secure = env.NODE_ENV === 'production';
       const cookie = (value, age) => `${COOKIE}=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${age}${secure ? '; Secure' : ''}`;
@@ -52,29 +52,29 @@ export function createApi({ storage = getStorage, env = process.env } = {}) {
         return json({ available: true, configured, admin, capabilities: ['state'], user: admin ? { id: 'primary', name: env.GAUBRE_ADMIN_NAME || 'Organisation', role: 'organizer' } : null });
       }
       if (route === 'public' && method === 'GET') {
-        const document = db.read();
+        const document = await db.read();
         return json({ revision: document.revision, state: publicState(document.state) });
       }
       if (route === 'login' && method === 'POST') {
         if (!configured) throw new HttpError(503, 'Le compte organisateur doit être configuré sur le serveur.');
         const data = await readJson(request, 4096);
-        db.consumeLoginAttempt('organizer');
+        await db.consumeLoginAttempt('organizer');
         const valid = await verifyPassword(data?.password, hash);
         if (!valid || data?.username !== username) throw new HttpError(401, 'Identifiant ou mot de passe incorrect.');
-        db.clearLoginAttempts('organizer');
-        db.deleteSession(token);
-        return json({ ok: true }, 200, { 'Set-Cookie': cookie(db.createSession(credentialHash), 43200) });
+        await db.clearLoginAttempts('organizer');
+        await db.deleteSession(token);
+        return json({ ok: true }, 200, { 'Set-Cookie': cookie(await db.createSession(credentialHash), 43200) });
       }
       if (['state', 'logout'].includes(route) && !admin) throw new HttpError(401, 'Connexion administrateur nécessaire.');
       if (route === 'logout' && method === 'POST') {
-        db.deleteSession(token);
+        await db.deleteSession(token);
         return json({ ok: true }, 200, { 'Set-Cookie': cookie('', 0) });
       }
-      if (route === 'state' && method === 'GET') return json(db.read());
+      if (route === 'state' && method === 'GET') return json(await db.read());
       if (route === 'state' && method === 'PUT') {
         const revision = request.headers.get('if-match');
         if (!/^\d+$/.test(revision || '') || !Number.isSafeInteger(Number(revision))) throw new HttpError(428, 'La révision des données est nécessaire.');
-        return json(db.save(await readJson(request), Number(revision)));
+        return json(await db.save(await readJson(request), Number(revision)));
       }
       throw new HttpError(['session', 'login', 'logout', 'state', 'public'].includes(route) ? 405 : 404, 'Point d’accès ou méthode non disponible.');
     } catch (error) {

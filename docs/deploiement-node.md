@@ -4,7 +4,7 @@
 
 Une instance de l’application sur un serveur Node.js 24.15+ (branche 24.x), avec HTTPS et un disque persistant. PHP et Contao ne sont plus nécessaires à l’exécution de cette application. Contao peut rester sur son hébergement indépendamment.
 
-Cette version utilise SQLite. Ne pas la déployer sur un disque éphémère ni lancer plusieurs serveurs avec des bases locales différentes. Une migration de l’adaptateur vers une base partagée serait nécessaire pour ce type d’hébergement.
+Par défaut, cette version utilise SQLite. Ne pas la déployer sur un disque éphémère ni lancer plusieurs serveurs avec des bases locales différentes. Utilisez Supabase pour une base partagée ou plusieurs instances.
 
 ## Configuration
 
@@ -15,13 +15,25 @@ Cette version utilise SQLite. Ne pas la déployer sur un disque éphémère ni l
 5. Exécuter `npm test`, puis `npm run build`.
 6. Démarrer `npm start` sous un gestionnaire de processus, derrière un reverse proxy HTTPS. Le proxy doit limiter la taille des requêtes et ne transmettre que le trafic destiné à cette application. Le service Node ne doit pas être exposé directement à Internet.
 
+## Supabase (optionnel)
+
+Utilisez Supabase quand plusieurs organisateurs ou instances de l’application doivent partager les mêmes données. Exécutez d’abord la migration `supabase/migrations/20260921000000_gaubretrail_state.sql` dans le SQL Editor, puis configurez :
+
+```dotenv
+GAUBRE_STORAGE_DRIVER=supabase
+SUPABASE_URL=https://votre-projet.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+```
+
+La clé secrète reste uniquement côté serveur. Ne renseignez pas `GAUBRE_DATABASE_PATH` pour une configuration Supabase : il est ignoré. La migration de données se fait avec le même export privé et la même commande `npm run import:state -- fichier.json` après avoir activé ces variables.
+
 Le build est dans `.next/`, les ressources publiques dans `public/`. Le dossier `data/organization.json` reste une source privée d’initialisation requise par le serveur ; il ne doit pas être servi comme fichier public. Le projet peut être installé sur le serveur par un checkout et `npm ci`, puis construit sur place.
 
 Le serveur web relaie toutes les requêtes applicatives à Next.js. Il ne doit pas servir la racine du dépôt comme un répertoire statique. Ne pas publier `.env.local`, `.storage/`, `api/config.php`, `api/storage/`, `imports/` ni les fichiers Excel. L’ancien dossier `out/` n’est plus un livrable de cette application.
 
 ## Reprendre les données existantes
 
-La nouvelle application n’accède pas automatiquement à l’ancienne base MariaDB ni au stockage des navigateurs. Conserver l’ancienne application jusqu’à la validation de la reprise.
+La nouvelle application n’accède pas automatiquement aux anciennes données serveur ni au stockage des navigateurs. Conserver l’ancienne application jusqu’à la validation de la reprise.
 
 Si la nouvelle application est ouverte dans le même navigateur à la même adresse que l’ancienne version locale, la vue Sauvegardes propose « Exporter les anciennes données de ce navigateur ». Ce bouton télécharge une copie sans effacer le stockage ni modifier le serveur. Restaurer ensuite explicitement ce fichier. Le navigateur ne peut pas accéder aux données d’une autre adresse ou d’un autre profil.
 

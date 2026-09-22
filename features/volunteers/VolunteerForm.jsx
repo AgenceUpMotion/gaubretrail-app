@@ -4,11 +4,11 @@ import Modal from '../../components/ui/Modal';
 import { normalize } from '../../domain.js';
 import { assignmentHours, editionIds, saveVolunteer, volunteerName } from './model.mjs';
 
-export default function VolunteerForm({ initial, state, editionId, onSave, onClose, getSnapshot }) {
+export default function VolunteerForm({ initial, state, editionId, onSave, onClose, getSnapshot, organizationMember = false }) {
   const [base] = useState(state);
   const [draft, setDraft] = useState(() => ({
     firstName: '', lastName: '', phone: '', email: '', notes: '', active: true,
-    organizationMember: false, publicVisible: false,
+    organizationMember,
     ...initial, editionIds: initial.id ? editionIds(state, initial) : [editionId],
   }));
   const [busy, setBusy] = useState(false);
@@ -24,7 +24,7 @@ export default function VolunteerForm({ initial, state, editionId, onSave, onClo
     setBusy(true); setError('');
     try {
       if (getSnapshot() !== base) throw Error('Les données ont changé pendant la saisie. Fermez cette fiche et ouvrez-la à nouveau.');
-      await onSave(saveVolunteer(base, draft));
+      await onSave(saveVolunteer(base, { ...draft, organizationMember }));
       onClose();
     } catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
@@ -40,13 +40,8 @@ export default function VolunteerForm({ initial, state, editionId, onSave, onClo
               <input name={key} type={type} required={['firstName', 'lastName'].includes(key)} maxLength={key === 'email' ? 200 : 100}
                 value={draft[key]} onChange={event => update(key, event.target.value)} />
             </label>)}
-          <fieldset><legend>Éditions de participation *</legend>
-            {state.editions.map(edition => <label className="org-check" key={edition.id}>
-              <input type="checkbox" checked={draft.editionIds.includes(edition.id)} onChange={event => update('editionIds', event.target.checked ? [...draft.editionIds, edition.id] : draft.editionIds.filter(id => id !== edition.id))}/>{edition.name}
-            </label>)}
-          </fieldset>
           <label>Notes privées<textarea name="notes" rows={3} value={draft.notes} onChange={event => update('notes', event.target.value)}/></label>
-          {[['active', 'Actif'], ['organizationMember', 'Membre de l’organisation · peut être référent'], ['publicVisible', 'Autoriser la publication de ses missions sur les postes publics']].map(([key, title]) =>
+          {[['active', organizationMember ? 'Actif dans l’équipe organisation' : 'Actif']].map(([key, title]) =>
             <label className="org-check" key={key}><input type="checkbox" name={key} checked={Boolean(draft[key])} onChange={event => update(key, event.target.checked)}/>{title}</label>)}
         </div>
         {suggestions.length > 0 && <section className="volunteer-suggestions"><h3>Fiches déjà présentes dans l’annuaire</h3>

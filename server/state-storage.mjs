@@ -82,12 +82,21 @@ export function createStorage(path, seed, now = Date.now) {
 let storage;
 export function getStorage() {
   if (!storage) {
+    const seed = JSON.parse(readFileSync(resolve('data/organization.json'), 'utf8'));
+    const driver = process.env.GAUBRE_STORAGE_DRIVER || 'sqlite';
+    if (driver === 'supabase') {
+      storage = import('./supabase-storage.mjs').then(({ createSupabaseStorage }) => createSupabaseStorage({
+        url: process.env.SUPABASE_URL,
+        secretKey: process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
+      }, seed));
+      return storage;
+    }
+    if (driver !== 'sqlite') throw Error('GAUBRE_STORAGE_DRIVER doit être « sqlite » ou « supabase ».');
     // Runtime database files are never build assets and must not be traced.
     const path = resolve(/* turbopackIgnore: true */ process.env.GAUBRE_DATABASE_PATH || '.storage/gaubretrail.sqlite');
     const publicPath = resolve('public');
     if (path === publicPath || path.startsWith(publicPath + sep)) throw Error('La base doit être stockée hors du dossier public.');
-    const seed = JSON.parse(readFileSync(resolve('data/organization.json'), 'utf8'));
-    storage = createStorage(path, seed);
+    storage = Promise.resolve(createStorage(path, seed));
   }
   return storage;
 }

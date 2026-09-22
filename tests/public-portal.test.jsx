@@ -44,7 +44,7 @@ test('Public home hides the wrapped map and searches published missions in eithe
       assert.match(document.getElementById('portalResults').textContent, /Parking/);
     }
     fireEvent.input(input, { target: { value: 'Secret' } });
-    assert.equal(document.querySelectorAll('.public-person').length, 0);
+    assert.equal(document.querySelectorAll('.public-person').length, 1);
     fireEvent.change(document.getElementById('publicEdition'), { target: { value: winter.id } });
     assert.match(document.getElementById('portalResults').textContent, /Aucune mission publiée pour cette édition/);
     fireEvent.change(document.getElementById('publicEdition'), { target: { value: summer.id } });

@@ -273,8 +273,8 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
       const crownMaterial=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,flatShading:true});
       this.trunks=new THREE.InstancedMesh(trunkGeometry,trunkMaterial,trees.length);
       this.crowns=new THREE.InstancedMesh(crownGeometry,crownMaterial,trees.length*3);
-      const wallMaterial=new THREE.MeshStandardMaterial({color:0xe4cfb4,roughness:1,flatShading:true});
-      const roofMaterial=new THREE.MeshStandardMaterial({color:0xc96f4b,roughness:1,flatShading:true});
+      const wallMaterial=new THREE.MeshStandardMaterial({color:0xc9c0d4,roughness:1,flatShading:true});
+      const roofMaterial=new THREE.MeshStandardMaterial({color:0x89769f,roughness:1,flatShading:true});
       this.walls=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),wallMaterial,buildings.length);
       const roofGeometry=new THREE.ConeGeometry(1,1,4);roofGeometry.rotateX(Math.PI/2);roofGeometry.rotateZ(Math.PI/4);
       this.roofs=new THREE.InstancedMesh(roofGeometry,roofMaterial,buildings.length);

@@ -10,7 +10,8 @@ export default function Modal({ title, children, onClose, busy = false }) {
     return () => dialog.close();
   }, []);
   return <dialog ref={ref} className="react-dialog" aria-labelledby={titleId}
-    onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
+    onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}
+    onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
     <h2 id={titleId}>{title}</h2>{children}
   </dialog>;
 }
