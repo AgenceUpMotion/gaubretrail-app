@@ -36,6 +36,7 @@ export function saveVolunteer(state, draft) {
   const record = { ...existing, ...draft, id: draft.id || uid() };
   for (const field of ['firstName', 'lastName', 'phone', 'email', 'notes']) record[field] = String(record[field] || '').trim();
   if (!record.firstName || !record.lastName) throw Error('Le prénom et le nom sont obligatoires.');
+  if (record.active) record.applicationPending = false;
   if (existing) next.volunteers[next.volunteers.indexOf(existing)] = record;
   else next.volunteers.push(record);
   return next;

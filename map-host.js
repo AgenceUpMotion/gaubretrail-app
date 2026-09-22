@@ -85,6 +85,8 @@ export function createMapHost() {
     },
     flyTo(options) { camera = ['flyTo', options]; real?.flyTo(options); },
     easeTo(options) { camera = ['easeTo', options]; real?.easeTo(options); },
+    stop() { real?.stop(); },
+    resize() { real?.resize(); },
     fitBounds(bounds, options) {
       const box = bounds.toArray ? bounds.toArray() : bounds;
       camera = ['fitBounds', box, options];

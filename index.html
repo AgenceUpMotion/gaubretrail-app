@@ -53,7 +53,7 @@
         <div class="toggles">
           <label><span>Bénévoles</span><input id="staffToggle" type="checkbox" checked></label>
           <div class="post-status-legend" aria-label="Couleurs des postes"><span><i class="is-complete"></i>Équipe complète</span><span><i class="is-incomplete"></i>À renforcer</span><span><i class="is-empty"></i>À affecter</span></div>
-          <label><span>Propriétaires</span><input id="ownersToggle" type="checkbox" checked></label>
+          <label id="ownersToggleControl"><span>Propriétaires</span><input id="ownersToggle" type="checkbox" checked></label>
           <label><span>Ravitaillements</span><input id="aidToggle" type="checkbox" checked></label>
           <label><span>Photographes</span><input id="photographersToggle" type="checkbox" checked></label>
         </div>
@@ -82,7 +82,11 @@
       </div>
       <div class="volunteer-finder">
         <label for="publicVolunteerSearch">Retrouver mon poste</label>
-        <input id="publicVolunteerSearch" type="search" autocomplete="off" placeholder="Saisissez votre nom…">
+        <small>Recherchez votre nom pour afficher vos missions.</small>
+        <div class="finder-search-field">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+          <input id="publicVolunteerSearch" type="search" autocomplete="off" placeholder="Prénom ou nom…">
+        </div>
         <div id="publicVolunteerResults" class="finder-results"></div>
       </div>
       <div id="drawingToolbar" class="drawing-toolbar" hidden>

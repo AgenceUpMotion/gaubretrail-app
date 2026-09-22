@@ -50,6 +50,7 @@ export default function VolunteerForm({ initial, state, editionId, onSave, onClo
           </button>)}
         </section>}
       </fieldset>
+      {draft.application && <section className="volunteer-application"><h3>Demande d’inscription</h3><p>Reçue le {new Date(draft.application.submittedAt).toLocaleString('fr-FR')}.</p><dl>{draft.application.availability && <><dt>Disponibilités</dt><dd>{draft.application.availability}</dd></>}{draft.application.missionTypes?.length > 0 && <><dt>Types de mission</dt><dd>{draft.application.missionTypes.join(' · ')}</dd></>}{draft.application.missions?.length > 0 && <><dt>Missions souhaitées</dt><dd>{draft.application.missions.map(mission => `${mission.number} · ${mission.name}`).join(' · ')}</dd></>}{draft.application.preference && <><dt>Autre envie</dt><dd>{draft.application.preference}</dd></>}{draft.application.friend?.name && <><dt>Avec un copain</dt><dd>{draft.application.friend.name}</dd></>}{draft.application.notes && <><dt>Message</dt><dd>{draft.application.notes}</dd></>}</dl></section>}
       {draft.id && <section><h3>Participations et postes</h3><ul>
         {assignments.map(assignment => <li key={assignment.id}>{state.editions.find(e => e.id === assignment.editionId)?.name} · {assignment.date} · {assignmentHours(assignment)} → {state.posts.find(p => p.id === assignment.postId)?.name}</li>)}
         {(draft.history || []).map((entry, index) => <li key={index}>{entry.year} · {entry.role} · {entry.location} (historique importé)</li>)}

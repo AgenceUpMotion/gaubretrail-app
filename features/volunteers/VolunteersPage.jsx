@@ -27,7 +27,9 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
   async function toggle(volunteer) {
     try {
       const next = structuredClone(repository.state);
-      next.volunteers.find(item => item.id === volunteer.id).active = !volunteer.active;
+      const target = next.volunteers.find(item => item.id === volunteer.id);
+      target.active = !volunteer.active;
+      if (target.active) target.applicationPending = false;
       await save(next);
     } catch (failure) { setError(failure.message); }
   }
@@ -35,7 +37,7 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
     try {
       const ids = new Set(result.records.map(volunteer => volunteer.id));
       const next = structuredClone(repository.state);
-      next.volunteers.forEach(volunteer => { if (ids.has(volunteer.id)) volunteer.active = active; });
+      next.volunteers.forEach(volunteer => { if (ids.has(volunteer.id)) { volunteer.active = active; if (active) volunteer.applicationPending = false; } });
       await save(next);
     } catch (failure) { setError(failure.message); }
   }
@@ -86,16 +88,16 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
       <th aria-sort={filters.sort === 'asc' ? 'ascending' : filters.sort === 'desc' ? 'descending' : 'none'}><button className="table-sort" onClick={() => filter('sort', filters.sort === 'asc' ? 'desc' : 'asc')}>Bénévole</button></th><th>Coordonnées</th>
       <th><button className="table-sort" onClick={() => filter('sort', filters.sort === 'post-asc' ? 'post-desc' : 'post-asc')}>N° poste</button></th><th>Poste</th><th>Horaires</th><th>Statut</th><th>Actions</th>
     </tr></thead><tbody>{result.items.map(({ volunteer, assignments, posts: assignedPosts }) => <tr key={volunteer.id} className={`volunteer-row ${volunteer.active ? 'is-active' : 'is-inactive'}`} aria-disabled={!volunteer.active}>
-      <td data-label="Bénévole" className="volunteer-identity-cell"><div className="volunteer-identity"><span className="volunteer-state-dot" aria-hidden="true"/><div><button className="org-link" disabled={busy} onClick={() => setEditing(volunteer)}>{volunteerName(volunteer)}</button>{!volunteer.active && <small className="volunteer-disabled-note">Bénévole désactivé</small>}{volunteer.organizationMember && <small className="volunteer-org-member">Organisation</small>}</div></div></td>
+      <td data-label="Bénévole" className="volunteer-identity-cell"><div className="volunteer-identity"><span className="volunteer-state-dot" aria-hidden="true"/><div><button className="org-link" disabled={busy} onClick={() => setEditing(volunteer)}>{volunteerName(volunteer)}</button>{volunteer.applicationPending ? <small className="volunteer-disabled-note">Nouvelle candidature</small> : !volunteer.active && <small className="volunteer-disabled-note">Bénévole désactivé</small>}{volunteer.organizationMember && <small className="volunteer-org-member">Organisation</small>}</div></div></td>
       <td data-label="Coordonnées" className="volunteer-contact">{volunteer.phone ? <a href={`tel:${volunteer.phone.replace(/[^+\d]/g, '')}`}>{volunteer.phone}</a> : <span>—</span>}{volunteer.email && <a href={`mailto:${volunteer.email}`}>{volunteer.email}</a>}</td>
       <td data-label="N° poste" className="volunteer-post-numbers">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-number" key={`${post.id}-${index}`}>{post.number}</span>) : '—'}</td>
       <td data-label="Poste" className="volunteer-posts">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-name" key={`${post.id}-${index}`}>{post.name}</span>) : 'Sans poste'}</td>
       <td data-label="Horaires" className="volunteer-hours">{assignments.length ? assignments.map(assignment => <span key={assignment.id}>{assignmentHours(assignment)}</span>) : '—'}</td>
-      <td data-label="Statut"><span className={`org-badge ${volunteer.active ? 'is-active' : 'is-inactive'}`}>{volunteer.active ? 'Actif' : 'Désactivé'}</span></td>
+      <td data-label="Statut"><span className={`org-badge ${volunteer.applicationPending ? 'is-inactive' : volunteer.active && !assignments.length ? 'is-needs-assignment' : volunteer.active ? 'is-active' : 'is-inactive'}`}>{volunteer.applicationPending ? 'À traiter' : volunteer.active && !assignments.length ? 'À affecter' : volunteer.active ? 'Actif' : 'Désactivé'}</span></td>
       <td data-label="Actions" className="org-row-actions volunteer-actions">
         <button className="icon-action edit-action" disabled={busy} title="Modifier" aria-label={`Modifier ${volunteerName(volunteer)}`} onClick={() => setEditing(volunteer)}><ActionIcon name="edit"/></button>
         <button className={`icon-action active-action ${volunteer.active ? 'is-enabled' : ''}`} disabled={busy} title={volunteer.active ? 'Désactiver' : 'Activer'} aria-label={`${volunteer.active ? 'Désactiver' : 'Activer'} ${volunteerName(volunteer)}`} onClick={() => toggle(volunteer)}><ActionIcon name="active"/></button>
-        <button className="icon-action" disabled={busy} title={organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} aria-label={`${organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} ${volunteerName(volunteer)}`} onClick={() => transfer(volunteer)}>{organizationOnly ? '→ Bénév.' : '→ Orga'}</button>
+        <button className="icon-action transfer-action" disabled={busy} title={organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} aria-label={`${organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} ${volunteerName(volunteer)}`} onClick={() => transfer(volunteer)}><ActionIcon name={organizationOnly ? 'transfer' : 'crown'}/></button>
         <button className="icon-action delete-action" disabled={busy} title="Supprimer" aria-label={`Supprimer ${volunteerName(volunteer)}`} onClick={() => { setError(''); setDeleting(volunteer); }}><ActionIcon name="delete"/></button>
       </td>
     </tr>)}{!result.items.length && <tr><td colSpan={7}>Aucun bénévole ne correspond à ces filtres.</td></tr>}</tbody></table></div>
