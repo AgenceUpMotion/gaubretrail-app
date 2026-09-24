@@ -8,6 +8,7 @@ const PLAN_FINISH_PIXEL = [775, 714];
 const PLAN_SCALE_METERS_PER_PIXEL = 0.0808;
 const PLAN_ROTATION_DEGREES = -61.7;
 const MIRROR_ACROSS_CASTLE_FINISH_AXIS = true;
+const CASTLE_LONG_AXIS_DEGREES = 64.35;
 
 const LAYER_IDS = [
   'event-village-zones', 'event-village-zone-outlines', 'event-village-corridors',
@@ -138,15 +139,10 @@ function crowdPoints(castle) {
 }
 
 export function createEventVillage3D(castle, finish) {
-  const lineStart = planCoordinate(castle, FINISH_LINE_PIXELS[0]);
-  const lineEnd = planCoordinate(castle, FINISH_LINE_PIXELS[1]);
-  const meanLatitude = (lineStart[1] + lineEnd[1]) * Math.PI / 360;
   return {
     origin: finish,
-    finishRotation: Math.atan2(
-      (lineEnd[1] - lineStart[1]) * 111320,
-      (lineEnd[0] - lineStart[0]) * 111320 * Math.cos(meanLatitude),
-    ),
+    // The finish arch follows the château's long façade, as on the site plan.
+    finishRotation: CASTLE_LONG_AXIS_DEGREES * Math.PI / 180,
     structures: VILLAGE_STRUCTURES.map(item => ({
       ...item,
       coordinate: planCoordinate(castle, item.pixel),
@@ -239,5 +235,6 @@ export const eventVillageCalibration = {
   scale: PLAN_SCALE_METERS_PER_PIXEL,
   rotation: PLAN_ROTATION_DEGREES,
   mirrored: MIRROR_ACROSS_CASTLE_FINISH_AXIS,
+  castleLongAxis: CASTLE_LONG_AXIS_DEGREES,
 };
 export const eventVillagePlanCoordinate = planCoordinate;

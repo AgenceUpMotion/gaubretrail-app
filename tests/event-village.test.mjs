@@ -30,4 +30,5 @@ test('the village is mirrored and provides a populated lightweight 3D scene', ()
   assert.ok(scene.structures.some(item => item.name === 'Chrono'));
   assert.ok(scene.crowd.length >= 180);
   assert.deepEqual(new Set(scene.crowd.map(person => person.role)), new Set(['public','runner','volunteer']));
+  assert.ok(Math.abs(scene.finishRotation - eventVillageCalibration.castleLongAxis * Math.PI / 180) < Number.EPSILON);
 });
