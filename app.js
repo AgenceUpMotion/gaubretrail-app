@@ -1,7 +1,7 @@
 import * as maplibregl from 'maplibre-gl';
 import {createLandscapeLayer,fetchLandscape,fallbackLandscape} from './landscape.js';
 import {applySeasonTheme} from './theme.js';
-import {installEventVillage,setEventVillageVisibility} from './map/event-village.js';
+import {createEventVillage3D,installEventVillage,setEventVillageVisibility} from './map/event-village.js';
 
 
 
@@ -53,6 +53,7 @@ const SATELLITE_TILES = 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile
 const EVENT_CENTER = [-1.0715847, 46.9452378];
 const FINISH_CENTER = [-1.07138875, 46.9449726];
 const CASTLE = [-1.0720354, 46.9452262];
+const EVENT_VILLAGE_3D = createEventVillage3D(CASTLE, FINISH_CENTER);
 const LANDEBAUDIERE_HALL = [-1.0711116, 46.9462587];
 const LANDEBAUDIERE_PARKING = [-1.0721457, 46.9464085];
 const COURSE_BOUNDS = [[-1.0995306, 46.9117739], [-0.9960511, 46.9708749]];
@@ -167,7 +168,7 @@ async function loadLandscape(){
   // Building geometry is rendered exclusively by the Three.js custom layer.
   // Rendering the same OSM footprints as MapLibre extrusions caused two 3D
   // buildings to occupy the same location.
-  landscapeLayer=createLandscapeLayer(data,maplibregl,{castle:CASTLE,hall:LANDEBAUDIERE_HALL,parking:LANDEBAUDIERE_PARKING,finish:FINISH_CENTER});
+  landscapeLayer=createLandscapeLayer(data,maplibregl,{castle:CASTLE,hall:LANDEBAUDIERE_HALL,parking:LANDEBAUDIERE_PARKING,village:EVENT_VILLAGE_3D});
   landscapeLayer.eventVisible=eventVillageVisible&&activeEdition==='summer';
   landscapeLayer.treesVisible=document.querySelector('#treesToggle').checked;
   landscapeLayer.buildingsVisible=document.querySelector('#buildingsToggle').checked;

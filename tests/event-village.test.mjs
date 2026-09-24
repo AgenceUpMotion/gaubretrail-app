@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { eventVillageCalibration, eventVillagePlanCoordinate } from '../map/event-village.js';
+import { createEventVillage3D, eventVillageCalibration, eventVillagePlanCoordinate } from '../map/event-village.js';
 
 const castle = [-1.0720354, 46.9452262];
 const routeFinishes = [
@@ -19,4 +19,15 @@ test('the georeferenced plan puts the finish arch at the centre of all route fin
   const expected = routeFinishes.reduce((sum, point) => [sum[0] + point[0] / routeFinishes.length, sum[1] + point[1] / routeFinishes.length], [0, 0]);
   const actual = eventVillagePlanCoordinate(castle, eventVillageCalibration.finishPixel);
   assert.ok(metersBetween(actual, expected) < 1, `finish calibration is ${metersBetween(actual, expected).toFixed(2)} m away`);
+});
+
+test('the village is mirrored and provides a populated lightweight 3D scene', () => {
+  const finish = routeFinishes.reduce((sum, point) => [sum[0] + point[0] / routeFinishes.length, sum[1] + point[1] / routeFinishes.length], [0, 0]);
+  const scene = createEventVillage3D(castle, finish);
+  assert.equal(eventVillageCalibration.mirrored, true);
+  assert.equal(scene.origin, finish);
+  assert.ok(scene.structures.length >= 15);
+  assert.ok(scene.structures.some(item => item.name === 'Chrono'));
+  assert.ok(scene.crowd.length >= 180);
+  assert.deepEqual(new Set(scene.crowd.map(person => person.role)), new Set(['public','runner','volunteer']));
 });

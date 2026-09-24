@@ -7,6 +7,7 @@ const PLAN_CASTLE_PIXEL = [180, 350];
 const PLAN_FINISH_PIXEL = [775, 714];
 const PLAN_SCALE_METERS_PER_PIXEL = 0.0808;
 const PLAN_ROTATION_DEGREES = -61.7;
+const MIRROR_ACROSS_CASTLE_FINISH_AXIS = true;
 
 const LAYER_IDS = [
   'event-village-zones', 'event-village-zone-outlines', 'event-village-corridors',
@@ -23,9 +24,22 @@ function offsetCoordinate(anchor, east, north) {
   return [anchor[0] + east / (111320 * Math.cos(anchor[1] * Math.PI / 180)), anchor[1] + north / 111320];
 }
 
+function mirrorPixel(pixel) {
+  if (!MIRROR_ACROSS_CASTLE_FINISH_AXIS) return pixel;
+  const [ax, ay] = PLAN_CASTLE_PIXEL;
+  const vx = PLAN_FINISH_PIXEL[0] - ax;
+  const vy = PLAN_FINISH_PIXEL[1] - ay;
+  const lengthSquared = vx * vx + vy * vy;
+  const projection = ((pixel[0] - ax) * vx + (pixel[1] - ay) * vy) / lengthSquared;
+  const projectedX = ax + projection * vx;
+  const projectedY = ay + projection * vy;
+  return [2 * projectedX - pixel[0], 2 * projectedY - pixel[1]];
+}
+
 function planCoordinate(anchor, pixel) {
-  const eastOnPlan = (pixel[0] - PLAN_CASTLE_PIXEL[0]) * PLAN_SCALE_METERS_PER_PIXEL;
-  const southOnPlan = (pixel[1] - PLAN_CASTLE_PIXEL[1]) * PLAN_SCALE_METERS_PER_PIXEL;
+  const mirroredPixel = mirrorPixel(pixel);
+  const eastOnPlan = (mirroredPixel[0] - PLAN_CASTLE_PIXEL[0]) * PLAN_SCALE_METERS_PER_PIXEL;
+  const southOnPlan = (mirroredPixel[1] - PLAN_CASTLE_PIXEL[1]) * PLAN_SCALE_METERS_PER_PIXEL;
   const [east, north] = rotate(eastOnPlan, southOnPlan, PLAN_ROTATION_DEGREES);
   return offsetCoordinate(anchor, east, north);
 }
@@ -61,8 +75,7 @@ function point(anchor, item) {
   return feature(item, { type: 'Point', coordinates: planCoordinate(anchor, item.pixel) });
 }
 
-function villageData(castle) {
-  const structures = [
+const VILLAGE_STRUCTURES = [
     { name: 'Podium', detail: 'Podium principal', pixel: [400,340], width: 10, depth: 6, category: 'podium', rotation: -4 },
     { name: 'Lot podium', detail: 'Tente 3 × 3 m', pixel: [520,294], width: 3, depth: 3, category: 'service' },
     { name: 'Bar', detail: '2 structures de 10 × 6 m', pixel: [805,286], width: 20, depth: 6, category: 'main', rotation: 3 },
@@ -78,7 +91,73 @@ function villageData(castle) {
     { name: 'Kiné', detail: '6 × 3 m', pixel: [810,1072], width: 6, depth: 3, category: 'medical' },
     { name: 'Médecin', detail: '4 × 4 m', pixel: [713,1170], width: 4, depth: 4, category: 'medical' },
     { name: 'Arche en bois', detail: 'Entrée du village', pixel: [1738,1138], width: 1, depth: 8, category: 'arrival', rotation: 12 },
-  ].map(item => rectangle(castle, item));
+];
+
+const FINISH_LINE_PIXELS = [[746,681],[804,747]];
+
+function planRotation(anchor, pixel, degrees = 0) {
+  const angle = degrees * Math.PI / 180;
+  const start = planCoordinate(anchor, pixel);
+  const end = planCoordinate(anchor, [pixel[0] + Math.cos(angle) * 20, pixel[1] + Math.sin(angle) * 20]);
+  const meanLatitude = (start[1] + end[1]) * Math.PI / 360;
+  const east = (end[0] - start[0]) * 111320 * Math.cos(meanLatitude);
+  const north = (end[1] - start[1]) * 111320;
+  return Math.atan2(north, east);
+}
+
+function randomFactory(seed) {
+  let value = seed >>> 0;
+  return () => ((value = (value * 1664525 + 1013904223) >>> 0) / 4294967296);
+}
+
+function crowdPoints(castle) {
+  const random = randomFactory(20260613);
+  const clusters = [
+    { center:[505,590], spread:[250,70], count:72, role:'public' },
+    { center:[780,735], spread:[125,80], count:38, role:'runner' },
+    { center:[285,805], spread:[150,95], count:30, role:'runner' },
+    { center:[1160,625], spread:[125,105], count:28, role:'public' },
+    { center:[465,370], spread:[105,55], count:20, role:'volunteer' },
+    { center:[805,310], spread:[160,50], count:18, role:'volunteer' },
+  ];
+  return clusters.flatMap((cluster, clusterIndex) => Array.from({ length: cluster.count }, (_, index) => {
+    const angle = random() * Math.PI * 2;
+    const radius = Math.sqrt(random());
+    const pixel = [
+      cluster.center[0] + Math.cos(angle) * cluster.spread[0] * radius,
+      cluster.center[1] + Math.sin(angle) * cluster.spread[1] * radius,
+    ];
+    return {
+      coordinate: planCoordinate(castle, pixel),
+      role: cluster.role,
+      height: 1.55 + random() * .32,
+      heading: random() * Math.PI * 2,
+      colorIndex: (clusterIndex * 7 + index) % 12,
+    };
+  }));
+}
+
+export function createEventVillage3D(castle, finish) {
+  const lineStart = planCoordinate(castle, FINISH_LINE_PIXELS[0]);
+  const lineEnd = planCoordinate(castle, FINISH_LINE_PIXELS[1]);
+  const meanLatitude = (lineStart[1] + lineEnd[1]) * Math.PI / 360;
+  return {
+    origin: finish,
+    finishRotation: Math.atan2(
+      (lineEnd[1] - lineStart[1]) * 111320,
+      (lineEnd[0] - lineStart[0]) * 111320 * Math.cos(meanLatitude),
+    ),
+    structures: VILLAGE_STRUCTURES.map(item => ({
+      ...item,
+      coordinate: planCoordinate(castle, item.pixel),
+      worldRotation: planRotation(castle, item.pixel, item.rotation || 0),
+    })),
+    crowd: crowdPoints(castle),
+  };
+}
+
+function villageData(castle) {
+  const structures = VILLAGE_STRUCTURES.map(item => rectangle(castle, item));
 
   const zones = [
     { name: 'Zone finisher', detail: 'Espace paillé après la ligne d’arrivée', category: 'finisher', points: [[72,850],[172,684],[335,628],[566,700],[548,823],[445,958],[274,1048],[98,967]] },
@@ -90,7 +169,7 @@ function villageData(castle) {
     { name: 'Couloir arrivée', detail: 'Circulation coureurs', category: 'corridor', points: [[228,480],[775,714],[1410,965]] },
     { name: 'Couloir arrivée', detail: 'Circulation coureurs', category: 'corridor', points: [[170,679],[335,628],[775,752],[1368,1038]] },
     { name: 'Accès ambulances', detail: 'À maintenir libre', category: 'emergency', points: [[62,852],[385,1042],[850,1238]] },
-    { name: 'Ligne d’arrivée', detail: 'Arrivée commune aux 4 parcours', category: 'finish', points: [[746,681],[804,747]] },
+    { name: 'Ligne d’arrivée', detail: 'Arrivée commune aux 4 parcours', category: 'finish', points: FINISH_LINE_PIXELS },
   ].map(item => line(castle, item));
 
   const utilities = [
@@ -154,5 +233,11 @@ export function setEventVillageVisibility(map, visible) {
   for(const id of LAYER_IDS)if(map.getLayer(id))map.setLayoutProperty(id,'visibility',visibility);
 }
 
-export const eventVillageCalibration = { castlePixel:PLAN_CASTLE_PIXEL, finishPixel:PLAN_FINISH_PIXEL, scale:PLAN_SCALE_METERS_PER_PIXEL, rotation:PLAN_ROTATION_DEGREES };
+export const eventVillageCalibration = {
+  castlePixel: PLAN_CASTLE_PIXEL,
+  finishPixel: PLAN_FINISH_PIXEL,
+  scale: PLAN_SCALE_METERS_PER_PIXEL,
+  rotation: PLAN_ROTATION_DEGREES,
+  mirrored: MIRROR_ACROSS_CASTLE_FINISH_AXIS,
+};
 export const eventVillagePlanCoordinate = planCoordinate;

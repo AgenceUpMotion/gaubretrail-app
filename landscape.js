@@ -226,8 +226,8 @@ function createLandebaudiereParking(){
   return group;
 }
 
-function createFinishArchModel(){
-  const group=new THREE.Group();group.name='Arche d’arrivée';group.rotation.z=THREE.MathUtils.degToRad(66);
+function createFinishArchModel(rotation=THREE.MathUtils.degToRad(66)){
+  const group=new THREE.Group();group.name='Arche d’arrivée';group.rotation.z=rotation;
   const purple=new THREE.MeshStandardMaterial({color:0x333399,roughness:.68,metalness:.08});
   const magenta=new THREE.MeshStandardMaterial({color:0xd900ae,roughness:.68,metalness:.08});
   const white=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.72});
@@ -237,6 +237,80 @@ function createFinishArchModel(){
   addBox(group,white,4.8,1.04,.42,0,0,5.28);
   addBox(group,magenta,1.15,1.25,.22,-3.45,0,.11);
   addBox(group,magenta,1.15,1.25,.22,3.45,0,.11);
+  return group;
+}
+
+function createVillageStructureModel(item,origin){
+  const group=new THREE.Group();group.name=item.name;
+  const [x,y]=offsetMeters(origin,item.coordinate);group.position.set(x,y,.05);group.rotation.z=item.worldRotation;
+  const white=new THREE.MeshStandardMaterial({color:0xfffdf7,roughness:.78});
+  const dark=new THREE.MeshStandardMaterial({color:0x302b36,roughness:.88});
+  const blue=new THREE.MeshStandardMaterial({color:0x2563eb,roughness:.72});
+  const magenta=new THREE.MeshStandardMaterial({color:0xd900ae,roughness:.7});
+  const red=new THREE.MeshStandardMaterial({color:0xef4444,roughness:.75});
+  const wood=new THREE.MeshStandardMaterial({color:0x9b6238,roughness:.95});
+  const floor=new THREE.MeshStandardMaterial({color:0x746b79,roughness:.92});
+  if(item.category==='arrival'){
+    addBox(group,wood,.34,.34,3.4,0,-item.depth/2,1.7);
+    addBox(group,wood,.34,.34,3.4,0,item.depth/2,1.7);
+    addBox(group,wood,.42,item.depth+.7,.42,0,0,3.45);
+    return group;
+  }
+  if(item.category==='podium'){
+    addBox(group,floor,item.width,item.depth,.65,0,0,.33);
+    addBox(group,dark,item.width*.82,.35,2.6,0,item.depth/2-.18,1.75);
+    addBox(group,magenta,item.width*.7,.4,.55,0,item.depth/2-.4,2.15);
+    return group;
+  }
+  const accent=item.category==='main'?blue:item.category==='medical'?red:item.category==='timing'?magenta:white;
+  const eave=2.45,roofHeight=Math.max(.75,Math.min(1.35,item.depth*.25));
+  const roof=new THREE.Mesh(hippedRoofGeometry(item.width+.35,item.depth+.35,roofHeight,Math.min(item.width,item.depth)*.32),accent);
+  roof.position.z=eave;group.add(roof);
+  for(const sx of [-1,1])for(const sy of [-1,1])addBox(group,dark,.13,.13,eave,sx*item.width*.46,sy*item.depth*.46,eave/2);
+  if(item.category==='main'){
+    addBox(group,accent,item.width*.88,.55,1.05,0,-item.depth*.32,.58);
+    for(let x=-item.width*.35;x<=item.width*.35;x+=2.2)addBox(group,white,.65,.65,.08,x,item.depth*.08,.75);
+  }else{
+    addBox(group,accent,item.width*.72,.18,.42,0,-item.depth*.49,1.45);
+  }
+  return group;
+}
+
+function createCrowdMeshes(crowd,origin){
+  const group=new THREE.Group();group.name=`Foule · ${crowd.length} personnes`;
+  const torsoGeometry=new THREE.CylinderGeometry(.2,.27,.72,6);torsoGeometry.rotateX(Math.PI/2);
+  const limbGeometry=new THREE.CylinderGeometry(.055,.075,.68,5);limbGeometry.rotateX(Math.PI/2);
+  const headGeometry=new THREE.SphereGeometry(.17,7,5);
+  const torsoMaterial=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.82,flatShading:true});
+  const limbMaterial=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.88,flatShading:true});
+  const headMaterial=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.9,flatShading:true});
+  const torsos=new THREE.InstancedMesh(torsoGeometry,torsoMaterial,crowd.length);
+  const limbs=new THREE.InstancedMesh(limbGeometry,limbMaterial,crowd.length*2);
+  const heads=new THREE.InstancedMesh(headGeometry,headMaterial,crowd.length);
+  const object=new THREE.Object3D();
+  const publicColors=[0x333399,0xd900ae,0x2563eb,0xf59e0b,0x0f766e,0x7c3aed,0xdc2626,0x475569];
+  const skinColors=[0xf2c9a5,0xdba77d,0xbe805b,0x8d5b42,0xf0bb91];
+  crowd.forEach((person,index)=>{
+    const [x,y]=offsetMeters(origin,person.coordinate),scale=person.height/1.72;
+    const outfit=person.role==='volunteer'?0xfacc15:person.role==='runner'?[0xd900ae,0x333399,0x16a34a,0xef4444][index%4]:publicColors[person.colorIndex%publicColors.length];
+    object.rotation.set(0,0,person.heading);object.scale.set(scale,scale,scale);
+    object.position.set(x,y,.99*scale);object.updateMatrix();torsos.setMatrixAt(index,object.matrix);torsos.setColorAt(index,new THREE.Color(outfit));
+    const sideX=Math.cos(person.heading)*.105,sideY=Math.sin(person.heading)*.105;
+    for(let leg=0;leg<2;leg++){
+      const direction=leg===0?-1:1;
+      object.position.set(x+sideX*direction,y+sideY*direction,.36*scale);object.updateMatrix();limbs.setMatrixAt(index*2+leg,object.matrix);limbs.setColorAt(index*2+leg,new THREE.Color(index%3===0?0x1f2937:0x334155));
+    }
+    object.rotation.set(0,0,0);object.position.set(x,y,1.55*scale);object.scale.set(scale,scale,scale);object.updateMatrix();heads.setMatrixAt(index,object.matrix);heads.setColorAt(index,new THREE.Color(skinColors[index%skinColors.length]));
+  });
+  for(const mesh of [torsos,limbs,heads]){mesh.frustumCulled=false;mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;group.add(mesh);}
+  return group;
+}
+
+function createEventVillageModel(village){
+  const group=new THREE.Group();group.name='Village GaubreTrail 3D';
+  for(const item of village.structures)group.add(createVillageStructureModel(item,village.origin));
+  group.add(createCrowdMeshes(village.crowd,village.origin));
+  group.add(createFinishArchModel(village.finishRotation));
   return group;
 }
 
@@ -250,8 +324,8 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
       this.unit=this.origin.meterInMercatorCoordinateUnits();
       this.scene.add(new THREE.HemisphereLight(0xe9f3ff,0x4c5734,1.65));
       const sun=new THREE.DirectionalLight(0xffefd0,2.45);sun.position.set(-280,-420,700);this.scene.add(sun);
-      this.castle=createCastleModel();this.hall=createLandebaudiereHall();this.parking=createLandebaudiereParking();this.finishArch=createFinishArchModel();
-      this.scene.add(this.castle,this.hall,this.parking,this.finishArch);
+      this.castle=createCastleModel();this.hall=createLandebaudiereHall();this.parking=createLandebaudiereParking();this.eventVillage=createEventVillageModel(landmarks.village);
+      this.scene.add(this.castle,this.hall,this.parking,this.eventVillage);
       const trunkGeometry=new THREE.CylinderGeometry(.2,.38,1,5);trunkGeometry.rotateX(Math.PI/2);
       const trunkMaterial=new THREE.MeshStandardMaterial({color:0x675040,roughness:1});
       const crownGeometry=new THREE.IcosahedronGeometry(1,1);
@@ -301,7 +375,7 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
       };
       placeLandmark(this.castle,landmarks.castle);
       placeLandmark(this.hall,landmarks.hall);placeLandmark(this.parking,landmarks.parking);
-      placeLandmark(this.finishArch,landmarks.finish);
+      placeLandmark(this.eventVillage,landmarks.village.origin);
       for(const mesh of [this.trunks,this.crowns,this.walls,this.roofs])mesh.instanceMatrix.needsUpdate=true;
       if(this.crowns.instanceColor)this.crowns.instanceColor.needsUpdate=true;
       if(changed)this.map.triggerRepaint();
@@ -312,7 +386,7 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
       this.castle.visible=this.buildingsVisible&&this.castle.userData.terrainReady!==false;
       this.hall.visible=this.buildingsVisible&&this.hall.userData.terrainReady!==false;
       this.parking.visible=this.buildingsVisible&&this.parking.userData.terrainReady!==false;
-      this.finishArch.visible=this.eventVisible&&this.finishArch.userData.terrainReady!==false;
+      this.eventVillage.visible=this.eventVisible&&this.eventVillage.userData.terrainReady!==false;
       if(!this.map.getTerrain())return;
       const projection=new THREE.Matrix4().fromArray(args.defaultProjectionData?.mainMatrix||args);
       const transform=new THREE.Matrix4().makeTranslation(this.origin.x,this.origin.y,0).scale(new THREE.Vector3(this.unit,-this.unit,this.unit));
@@ -322,7 +396,7 @@ export function createLandscapeLayer(data,maplibregl,landmarks){
     onRemove(){
       this.map.off('idle',this.update);this.map.off('terrain',this.update);
       for(const mesh of [this.trunks,this.crowns,this.walls,this.roofs]){mesh.geometry.dispose();mesh.material.dispose();mesh.dispose();}
-      for(const group of [this.castle,this.hall,this.parking,this.finishArch])group.traverse(object=>{if(object.isMesh){object.geometry.dispose();object.material.dispose();}});
+      for(const group of [this.castle,this.hall,this.parking,this.eventVillage])group.traverse(object=>{if(object.isMesh){object.geometry.dispose();object.material.dispose();}});
       this.renderer.dispose();
     }
   };
