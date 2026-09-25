@@ -46,6 +46,7 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
       const next = structuredClone(repository.state);
       const target = next.volunteers.find(item => item.id === volunteer.id);
       target.organizationMember = !organizationOnly;
+      if (organizationOnly) target.editionIds = [...new Set([...(target.editionIds || []), editionId, ...next.assignments.filter(assignment => assignment.volunteerId === target.id).map(assignment => assignment.editionId)])];
       await save(next);
     } catch (failure) { setError(failure.message); }
   }
@@ -64,9 +65,9 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
   }
   const title = organizationOnly ? 'Équipe organisation' : 'Annuaire des bénévoles';
   return <section aria-label={title} data-react-feature={organizationOnly ? 'organization-team' : 'volunteers'}>
-    <p className="edition-scope-note"><strong>{edition?.name}</strong> · {organizationOnly ? 'Les membres de l’organisation peuvent être affectés à un poste et référents propriétaires.' : 'Les missions sont publiques lorsque le poste est publié et le bénévole actif.'}</p>
+    <p className="edition-scope-note"><strong>{organizationOnly ? 'Équipe commune à toutes les éditions' : edition?.name}</strong> · {organizationOnly ? `Seuls les postes et horaires affichés ci-dessous concernent ${edition?.name}.` : 'Les missions sont publiques lorsque le poste est publié et le bénévole actif.'}</p>
     <div className="volunteer-overview volunteer-overview-compact">
-      <article><b>{result.total}</b><span>{organizationOnly ? 'membres organisation' : 'bénévoles'} · {edition?.name}</span></article>
+      <article><b>{result.total}</b><span>{organizationOnly ? 'membres organisation · toutes éditions' : `bénévoles · ${edition?.name}`}</span></article>
       <article><b>{result.active}</b><span>actifs</span></article>
       <article><b>{result.assigned}</b><span>affectés sur {edition?.name}</span></article>
     </div>
@@ -93,7 +94,7 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
       <td data-label="N° poste" className="volunteer-post-numbers">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-number" key={`${post.id}-${index}`}>{post.number}</span>) : '—'}</td>
       <td data-label="Poste" className="volunteer-posts">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-name" key={`${post.id}-${index}`}>{post.name}</span>) : 'Sans poste'}</td>
       <td data-label="Horaires" className="volunteer-hours">{assignments.length ? assignments.map(assignment => <span key={assignment.id}>{assignmentHours(assignment)}</span>) : '—'}</td>
-      <td data-label="Statut"><span className={`org-badge ${volunteer.applicationPending ? 'is-inactive' : volunteer.active && !assignments.length ? 'is-needs-assignment' : volunteer.active ? 'is-active' : 'is-inactive'}`}>{volunteer.applicationPending ? 'À traiter' : volunteer.active && !assignments.length ? 'À affecter' : volunteer.active ? 'Actif' : 'Désactivé'}</span></td>
+      <td data-label="Statut"><span className={`org-badge ${volunteer.applicationPending ? 'is-inactive' : volunteer.active && !assignments.length && !organizationOnly ? 'is-needs-assignment' : volunteer.active ? 'is-active' : 'is-inactive'}`}>{volunteer.applicationPending ? 'À traiter' : volunteer.active && !assignments.length && !organizationOnly ? 'À affecter' : volunteer.active ? 'Actif' : 'Désactivé'}</span></td>
       <td data-label="Actions" className="org-row-actions volunteer-actions">
         <button className="icon-action edit-action" disabled={busy} title="Modifier" aria-label={`Modifier ${volunteerName(volunteer)}`} onClick={() => setEditing(volunteer)}><ActionIcon name="edit"/></button>
         <button className={`icon-action active-action ${volunteer.active ? 'is-enabled' : ''}`} disabled={busy} title={volunteer.active ? 'Désactiver' : 'Activer'} aria-label={`${volunteer.active ? 'Désactiver' : 'Activer'} ${volunteerName(volunteer)}`} onClick={() => toggle(volunteer)}><ActionIcon name="active"/></button>

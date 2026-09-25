@@ -60,6 +60,37 @@ test('React create, status filter, toggle and edition switch use the shared snap
   assert.equal(screen.queryByRole('button', { name: 'Modifier Bernard Paul' }), null);
 });
 
+test('Organization team stays visible across editions and new members have no edition link', async () => {
+  const props = fixture();
+  const next = structuredClone(props.repository.state);
+  next.volunteers[0].organizationMember = true;
+  const winter = next.editions[1].id;
+  next.posts.push({ ...next.posts[0], id: 'winter-team-post', editionId: winter, courseIds: [] });
+  next.assignments.push({ id: 'winter-team-assignment', editionId: winter, volunteerId: 'v', postId: 'winter-team-post', date: '2026-12-01' });
+  await props.repository.store.save(next);
+  const view = render(<VolunteersPage {...props} organizationOnly/>);
+  assert.ok(screen.getByRole('button', { name: 'Modifier Martin Élodie' }));
+  view.rerender(<VolunteersPage {...props} editionId={winter} organizationOnly/>);
+  assert.ok(screen.getByRole('button', { name: 'Modifier Martin Élodie' }));
+  assert.match(screen.getByText(/Équipe commune à toutes les éditions/).textContent, /Équipe commune/);
+  fireEvent.click(screen.getByRole('button', { name: '+ Ajouter' }));
+  const dialog = screen.getByRole('dialog');
+  fireEvent.change(within(dialog).getByLabelText('Prénom *'), { target: { value: 'Paul' } });
+  fireEvent.change(within(dialog).getByLabelText('Nom *'), { target: { value: 'Durand' } });
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Enregistrer' }));
+  await waitFor(() => assert.ok(!screen.queryByRole('dialog')));
+  const member = props.repository.state.volunteers.find(volunteer => volunteer.firstName === 'Paul');
+  assert.equal(member.organizationMember, true);
+  assert.equal(member.editionIds, undefined);
+  view.rerender(<VolunteersPage {...props} editionId={props.editionId} organizationOnly/>);
+  assert.ok(screen.getByRole('button', { name: 'Modifier Durand Paul' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Transférer vers les bénévoles Martin Élodie' }));
+  await waitFor(() => assert.equal(props.repository.state.volunteers.find(volunteer => volunteer.id === 'v').organizationMember, false));
+  assert.deepEqual(props.repository.state.volunteers.find(volunteer => volunteer.id === 'v').editionIds, [props.editionId, winter]);
+  view.rerender(<VolunteersPage {...props} editionId={winter} organizationOnly={false}/>);
+  assert.ok(screen.getByRole('button', { name: 'Modifier Martin Élodie' }));
+});
+
 test('Failed saves retain the open form and draft; linked volunteers cannot be deleted', async () => {
   const props = fixture();
   render(<VolunteersPage {...props} onSave={async () => { throw Error('Serveur indisponible'); }}/>);

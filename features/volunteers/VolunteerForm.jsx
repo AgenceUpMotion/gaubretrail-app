@@ -9,7 +9,7 @@ export default function VolunteerForm({ initial, state, editionId, onSave, onClo
   const [draft, setDraft] = useState(() => ({
     firstName: '', lastName: '', phone: '', email: '', notes: '', active: true,
     organizationMember,
-    ...initial, editionIds: initial.id ? editionIds(state, initial) : [editionId],
+    ...initial, ...(!organizationMember ? { editionIds: initial.id ? editionIds(state, initial) : [editionId] } : {}),
   }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -45,7 +45,7 @@ export default function VolunteerForm({ initial, state, editionId, onSave, onClo
             <label className="org-check" key={key}><input type="checkbox" name={key} checked={Boolean(draft[key])} onChange={event => update(key, event.target.checked)}/>{title}</label>)}
         </div>
         {suggestions.length > 0 && <section className="volunteer-suggestions"><h3>Fiches déjà présentes dans l’annuaire</h3>
-          {suggestions.map(volunteer => <button type="button" key={volunteer.id} onClick={() => setDraft({ ...volunteer, phone: volunteer.phone || '', email: volunteer.email || '', notes: volunteer.notes || '', editionIds: [...new Set([...editionIds(state, volunteer), editionId])] })}>
+          {suggestions.map(volunteer => <button type="button" key={volunteer.id} onClick={() => setDraft({ ...volunteer, phone: volunteer.phone || '', email: volunteer.email || '', notes: volunteer.notes || '', ...(!organizationMember ? { editionIds: [...new Set([...editionIds(state, volunteer), editionId])] } : {}) })}>
             {volunteerName(volunteer)} · Utiliser cette fiche
           </button>)}
         </section>}

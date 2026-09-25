@@ -91,6 +91,11 @@
         true
       ],
       [
+        "intermediateTimes",
+        "Temps intermédiaires",
+        "intermediateTimes"
+      ],
+      [
         "volunteerLeadMinutes",
         "Présence avant le 1er passage (min)",
         "integer"

@@ -3,7 +3,22 @@ import assert from 'node:assert/strict';
 import { createStateStore } from '../lib/state-store.mjs';
 import { selectVolunteers, saveVolunteer, editionIds } from '../features/volunteers/model.mjs';
 import { prepareContactImport, exportContacts } from '../contacts.js';
-import { validate, runnerProgressAt, coordinateAtProgress } from '../domain.js';
+import { validate, runnerPassageAt, runnerProgressAt, coordinateAtProgress, estimatePresence, publicData } from '../domain.js';
+import { brandLogoUrl } from '../theme.js';
+
+test('Branding accepts safe colors and logo, and exposes only public visual settings', () => {
+  const state=seedState(),logo='data:image/png;base64,iVBORw0KGgo=';
+  state.settings={cadastreUrl:'private.example',branding:{primaryColor:'#123ABC',secondaryColor:'#FF7700',logo}};
+  assert.doesNotThrow(()=>validate(state));
+  assert.deepEqual(publicData(state).settings,{branding:{primaryColor:'#123ABC',secondaryColor:'#FF7700',logo}});
+  assert.equal(brandLogoUrl(state.settings),logo);
+  state.settings.branding.primaryColor='red';
+  assert.throws(()=>validate(state),/couleurs de personnalisation/);
+  state.settings.branding.primaryColor='#123ABC';
+  state.settings.branding.logo='data:image/svg+xml;base64,PHN2Zz4=';
+  assert.throws(()=>validate(state),/Logo invalide/);
+  assert.equal(brandLogoUrl(state.settings),'./assets/logo-gaubretrail.svg');
+});
 
 test('Live simulation positions the first and last runner along a route', () => {
   const course = { departureTime: '08:00', firstDuration: '01:00', lastDuration: '02:00' };
@@ -11,6 +26,37 @@ test('Live simulation positions the first and last runner along a route', () => 
   assert.equal(runnerProgressAt(course, 510, 'lastDuration').progress, 0.25);
   assert.equal(runnerProgressAt(course, 450, 'firstDuration').state, 'before');
   assert.deepEqual(coordinateAtProgress([[0, 0], [2, 0]], 0.25), [0.5, 0]);
+});
+test('Intermediate course times drive segment positions and passage estimates', () => {
+  const course = { id:'course', name:'20 km', distance:20, departureTime:'08:00', firstDuration:'02:00', lastDuration:'04:00', intermediateTimes:[
+    { km:5, firstDuration:'00:20', lastDuration:'00:50' },
+    { km:15, firstDuration:'01:20', lastDuration:'02:40' },
+  ] };
+  assert.equal(runnerProgressAt(course, 530, 'firstDuration').progress, .5);
+  assert.equal(runnerProgressAt(course, 530, 'lastDuration').progress, .25);
+  assert.equal(runnerPassageAt(course, .5, 'firstDuration'), 530);
+  assert.equal(runnerPassageAt(course, .5, 'lastDuration'), 585);
+  const presence=estimatePresence([{course,coords:[[0,0],[2,0]]}],{lng:1,lat:0});
+  assert.equal(presence.passages[0].first, 530);
+  assert.equal(presence.passages[0].last, 585);
+});
+
+test('A course accepts at most two ordered and coherent timing checkpoints', () => {
+  const state=seedState(),course=state.courses[0];
+  Object.assign(course,{distance:20,departureTime:'08:00',firstDuration:'02:00',lastDuration:'04:00',intermediateTimes:[
+    {km:5,firstDuration:'00:20',lastDuration:'00:50'},
+    {km:15,firstDuration:'01:20',lastDuration:'02:40'},
+  ]});
+  assert.doesNotThrow(()=>validate(state));
+  assert.deepEqual(publicData(state).courses.find(item=>item.id===course.id).intermediateTimes,course.intermediateTimes);
+  course.intermediateTimes.push({km:18,firstDuration:'01:45',lastDuration:'03:35'});
+  assert.throws(()=>validate(state),/Deux temps intermédiaires maximum/);
+  course.intermediateTimes.pop();
+  course.intermediateTimes[1].firstDuration='00:10';
+  assert.throws(()=>validate(state),/temps intermédiaires doivent progresser/);
+  course.intermediateTimes[1].firstDuration='01:20';
+  course.intermediateTimes[1].km=4;
+  assert.throws(()=>validate(state),/kilomètres intermédiaires doivent être croissants/);
 });
 import { seedState } from './helpers.mjs';
 import { readLocalBackup } from '../lib/local-backup.mjs';
@@ -50,6 +96,26 @@ test('Volunteer filters are edition-scoped, accent-insensitive, and include assi
   assert.deepEqual(selectVolunteers(state, summer.id, { query: post.name }).items.map(row => row.volunteer.id), ['a']);
   assert.equal(selectVolunteers(state, summer.id).assigned, 1);
   assert.deepEqual(editionIds(state, { id: 'a' }), [summer.id]);
+});
+
+test('Organization team is global while its post assignments remain edition-specific', () => {
+  const state = seedState();
+  const [summer, winter] = state.editions;
+  const winterPost = { ...state.posts[0], id: 'winter-post', editionId: winter.id, courseIds: [] };
+  state.posts.push(winterPost);
+  state.volunteers = [
+    { id: 'team', firstName: 'Alice', lastName: 'Martin', active: true, organizationMember: true, editionIds: [summer.id] },
+    { id: 'new-team', firstName: 'Paul', lastName: 'Durand', active: true, organizationMember: true },
+    { id: 'volunteer', firstName: 'Léa', lastName: 'Petit', active: true, editionIds: [summer.id] },
+  ];
+  state.assignments = [{ id: 'winter-team', editionId: winter.id, volunteerId: 'team', postId: winterPost.id, date: '2026-12-01' }];
+  assert.doesNotThrow(() => validate(state));
+  assert.deepEqual(selectVolunteers(state, summer.id, { organizationOnly: true }).items.map(row => row.volunteer.id), ['new-team', 'team']);
+  const winterTeam = selectVolunteers(state, winter.id, { organizationOnly: true });
+  assert.deepEqual(winterTeam.items.map(row => row.volunteer.id), ['new-team', 'team']);
+  assert.equal(winterTeam.assigned, 1);
+  assert.equal(selectVolunteers(state, summer.id, { organizationOnly: true }).assigned, 0);
+  assert.deepEqual(selectVolunteers(state, winter.id).items, []);
 });
 
 test('Editing preserves history, trims names and rejects broken assignment relations', () => {

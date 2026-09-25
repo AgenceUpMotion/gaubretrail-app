@@ -16,15 +16,17 @@
   <div id="portal"><p class="portal-loading" role="status">Chargement de Gaubre’Trail…</p></div>
   <header class="topbar">
     <div class="view-badge"><span>⛰</span> Carte 3D</div>
-    <div class="topbar-brand"><img src="./assets/logo-gaubretrail.svg" alt="Gaubre’Trail"></div>
+    <div class="topbar-brand"><img data-brand-logo src="./assets/logo-gaubretrail.svg" alt="Gaubre’Trail"></div>
     <div class="topbar-actions">
+      <a class="mobile-map-home" href="./index.html">← Accueil</a>
       <button id="managerButton" class="topbar-action manager-action">👥 Gestion du trail</button>
       <button id="planButton" class="topbar-action secondary-action">Plan d'arrivée</button>
     </div>
   </header>
 
   <main class="workspace">
-    <aside id="panel" class="panel">
+    <aside id="panel" class="panel closed" aria-label="Options de la carte">
+      <button id="closeMapOptions" class="mobile-sheet-close" type="button" aria-label="Fermer les options de la carte">×</button>
       <div class="panel-heading"><span>⚙</span> Explorer les parcours</div>
       <p class="panel-intro">Choisissez une distance puis explorez le tracé en relief.</p>
 
@@ -76,11 +78,13 @@
 
     <section class="map-stage">
       <div id="map"></div>
+      <button id="mobileMapScrim" class="mobile-map-scrim" type="button" aria-label="Fermer le panneau de la carte" hidden></button>
       <div class="map-title">
         <span><strong id="routeTitle">42 KM</strong> · GAUBRE'TRAIL</span>
         <h1 id="mapHeading">Les parcours en relief</h1>
       </div>
-      <div class="volunteer-finder">
+      <div id="mobileMapSearch" class="volunteer-finder">
+        <button id="closeMapSearch" class="mobile-sheet-close" type="button" aria-label="Fermer la recherche">×</button>
         <label for="publicVolunteerSearch">Retrouver mon poste</label>
         <small>Recherchez votre nom pour afficher vos missions.</small>
         <div class="finder-search-field">
@@ -96,6 +100,11 @@
       </div>
       <div class="map-hint">Glisser pour déplacer · molette pour zoomer · clic droit pour pivoter</div>
       <button id="menuButton" class="menu-button" aria-label="Afficher les contrôles">⚙ Parcours</button>
+      <nav class="mobile-map-dock" aria-label="Actions de la carte">
+        <button id="mobileCourses" type="button" aria-label="Choisir les parcours et voir les profils"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20zM9 4v13.5M15 6.5V20"/></svg><span>Parcours</span></button>
+        <button id="mobileSearch" type="button" aria-expanded="false" aria-controls="mobileMapSearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span>Rechercher</span></button>
+        <button id="mobileOptions" type="button" aria-expanded="false" aria-controls="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg><span>Options</span></button>
+      </nav>
     </section>
   </main>
 

@@ -11,15 +11,42 @@ export const coordinates=r=>Number.isFinite(r.lat)&&Number.isFinite(r.lng)&&Math
 const validDate=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value);
 const validTime=value=>typeof value==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(value);
 const validDuration=value=>typeof value==='string'&&/^\d{1,3}:[0-5]\d$/.test(value)&&durationMinutes(value)>0;
+const validBrandColor=value=>typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value);
+const validBrandLogo=value=>{
+  if(typeof value!=='string')return false;
+  const match=/^data:image\/(?:png|jpeg|webp);base64,([a-z0-9+/]+={0,2})$/i.exec(value);
+  return !!match&&match[1].length%4===0&&match[1].length*3/4-(match[1].match(/=+$/)?.[0].length||0)<=300000;
+};
 export function durationMinutes(value){const match=String(value??'').match(/^(\d{1,3}):([0-5]\d)$/);return match?Number(match[1])*60+Number(match[2]):NaN;}
 export function clockMinutes(value){if(!validTime(value))return NaN;const [hours,minutes]=value.split(':').map(Number);return hours*60+minutes;}
 export function formatClock(totalMinutes){if(!Number.isFinite(totalMinutes))return '';const rounded=Math.round(totalMinutes),dayOffset=Math.floor(rounded/1440),withinDay=((rounded%1440)+1440)%1440;return {time:`${String(Math.floor(withinDay/60)).padStart(2,'0')}:${String(withinDay%60).padStart(2,'0')}`,dayOffset};}
-// Planning simulation only: it estimates a constant pace, never GPS tracking.
+// Timing checkpoints describe elapsed durations since the start. Between two
+// checkpoints the simulated runner keeps a constant pace for that segment.
+function timingPoints(course,durationField){
+  const duration=durationMinutes(course?.[durationField]);
+  if(!Number.isFinite(duration))return null;
+  const distance=Number(course?.distance);
+  const checkpoints=Array.isArray(course?.intermediateTimes)&&distance>0?course.intermediateTimes
+    .map(point=>({progress:Number(point.km)/distance,elapsed:durationMinutes(point[durationField])}))
+    .filter(point=>point.progress>0&&point.progress<1&&point.elapsed>0&&point.elapsed<duration)
+    .sort((a,b)=>a.progress-b.progress):[];
+  return [{progress:0,elapsed:0},...checkpoints,{progress:1,elapsed:duration}];
+}
+export function runnerPassageAt(course,progress,durationField){
+  const departure=clockMinutes(course?.departureTime),points=timingPoints(course,durationField);
+  if(!Number.isFinite(departure)||!Number.isFinite(progress)||!points)return NaN;
+  const target=Math.max(0,Math.min(1,progress));
+  for(let i=1;i<points.length;i++)if(target<=points[i].progress){const a=points[i-1],b=points[i],ratio=(target-a.progress)/(b.progress-a.progress);return departure+a.elapsed+(b.elapsed-a.elapsed)*ratio;}
+  return departure+points.at(-1).elapsed;
+}
 export function runnerProgressAt(course,atMinutes,durationField){
-  const departure=clockMinutes(course?.departureTime),duration=durationMinutes(course?.[durationField]);
-  if(!Number.isFinite(atMinutes)||!Number.isFinite(departure)||!Number.isFinite(duration))return null;
-  const raw=(atMinutes-departure)/duration;
-  return {state:raw<0?'before':raw>1?'finished':'running',progress:Math.max(0,Math.min(1,raw)),departure,duration};
+  const departure=clockMinutes(course?.departureTime),points=timingPoints(course,durationField);
+  if(!Number.isFinite(atMinutes)||!Number.isFinite(departure)||!points)return null;
+  const duration=points.at(-1).elapsed,elapsed=atMinutes-departure;
+  if(elapsed<0)return {state:'before',progress:0,departure,duration};
+  if(elapsed>duration)return {state:'finished',progress:1,departure,duration};
+  for(let i=1;i<points.length;i++)if(elapsed<=points[i].elapsed){const a=points[i-1],b=points[i],ratio=(elapsed-a.elapsed)/(b.elapsed-a.elapsed);return {state:'running',progress:a.progress+(b.progress-a.progress)*ratio,departure,duration};}
+  return {state:'running',progress:1,departure,duration};
 }
 const segmentKm=(a,b)=>{const rad=Math.PI/180,h=Math.sin((b[1]-a[1])*rad/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin((b[0]-a[0])*rad/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(h)));};
 export function coordinateAtProgress(coords,progress){
@@ -52,7 +79,7 @@ export function estimatePresence(coursesWithCoords,point,{leadMinutes=15,tailMin
   for(const {course,coords} of coursesWithCoords||[]){
     const progress=routeProgress(coords,point),departure=clockMinutes(course?.departureTime),first=durationMinutes(course?.firstDuration),last=durationMinutes(course?.lastDuration);
     if(!Number.isFinite(progress)||!Number.isFinite(departure)||!Number.isFinite(first)||!Number.isFinite(last)||last<first)continue;
-    passages.push({courseId:course.id,name:course.name,progress,first:departure+first*progress,last:departure+last*progress,leadMinutes:Number.isInteger(course.volunteerLeadMinutes)?course.volunteerLeadMinutes:leadMinutes,tailMinutes:Number.isInteger(course.volunteerTailMinutes)?course.volunteerTailMinutes:tailMinutes});
+    passages.push({courseId:course.id,name:course.name,progress,first:runnerPassageAt(course,progress,'firstDuration'),last:runnerPassageAt(course,progress,'lastDuration'),leadMinutes:Number.isInteger(course.volunteerLeadMinutes)?course.volunteerLeadMinutes:leadMinutes,tailMinutes:Number.isInteger(course.volunteerTailMinutes)?course.volunteerTailMinutes:tailMinutes});
   }
   if(!passages.length)return null;
   const starts=passages.map(p=>p.first-p.leadMinutes);
@@ -77,6 +104,13 @@ export function inventory(s,editionId,zone='',typeId=''){
 }
 export function validate(s){
   if(s?.schemaVersion!==3)throw Error('Version de données non reconnue.');
+  if(s.settings!==undefined&&(!s.settings||typeof s.settings!=='object'||Array.isArray(s.settings)))throw Error('Paramètres invalides.');
+  if(s.settings?.branding!==undefined){
+    const branding=s.settings.branding;
+    if(!branding||typeof branding!=='object'||Array.isArray(branding))throw Error('Personnalisation invalide.');
+    for(const key of ['primaryColor','secondaryColor'])if(branding[key]!==undefined&&!validBrandColor(branding[key]))throw Error('Les couleurs de personnalisation doivent être au format #RRGGBB.');
+    if(branding.logo!==undefined&&!validBrandLogo(branding.logo))throw Error('Logo invalide : utilisez une image PNG, JPEG ou WebP de 300 Ko maximum.');
+  }
   for(const key of collections){if(!Array.isArray(s[key]))throw Error(`Collection manquante : ${key}`);const ids=new Set();for(const r of s[key]){if(!r||typeof r.id!=='string'||!r.id||ids.has(r.id))throw Error(`Identifiant absent ou dupliqué : ${key}`);ids.add(r.id);}}
   if(!s.editions.length)throw Error('Une édition au minimum est nécessaire.');
   const ref=(key,id)=>{if(!s[key].some(r=>r.id===id))throw Error(`Relation introuvable : ${key} / ${id}`);};
@@ -90,18 +124,38 @@ export function validate(s){
     if(r.color&&!/^#[0-9a-f]{6}$/i.test(r.color))throw Error('Couleur hexadécimale invalide.');
     if(r.geometry)geometry(r.geometry);
     if(r.geojson){if(r.geojson.type!=='FeatureCollection'||!Array.isArray(r.geojson.features)||!r.geojson.features.length)throw Error('Trace GeoJSON invalide.');for(const f of r.geojson.features){geometry(f.geometry);if(f.geometry.type!=='LineString')throw Error('Une trace doit être une ligne.');}}
-    if(key==='courses'){if(!Number.isFinite(r.distance)||r.distance<0)throw Error('Distance invalide.');if(r.source&&!/^\.\/data\/routes\/\d+\.geojson$/.test(r.source))throw Error('Source de parcours non autorisée.');if(r.departureTime&&!validTime(r.departureTime))throw Error('Heure de départ invalide.');if(r.firstDuration&&!validDuration(r.firstDuration)||r.lastDuration&&!validDuration(r.lastDuration))throw Error('Les temps de parcours doivent être saisis au format HH:MM.');if(r.firstDuration&&r.lastDuration&&durationMinutes(r.lastDuration)<durationMinutes(r.firstDuration))throw Error('Le temps du dernier participant doit être supérieur au temps du premier.');for(const field of ['volunteerLeadMinutes','volunteerTailMinutes'])if(r[field]!==undefined&&(!Number.isInteger(r[field])||r[field]<0))throw Error('Les marges de présence doivent être des minutes entières positives.');}
+    if(key==='courses'){
+      if(!Number.isFinite(r.distance)||r.distance<0)throw Error('Distance invalide.');
+      if(r.source&&!/^\.\/data\/routes\/\d+\.geojson$/.test(r.source))throw Error('Source de parcours non autorisée.');
+      if(r.departureTime&&!validTime(r.departureTime))throw Error('Heure de départ invalide.');
+      if(r.firstDuration&&!validDuration(r.firstDuration)||r.lastDuration&&!validDuration(r.lastDuration))throw Error('Les temps de parcours doivent être saisis au format HH:MM.');
+      const first=durationMinutes(r.firstDuration),last=durationMinutes(r.lastDuration);
+      if(r.firstDuration&&r.lastDuration&&last<first)throw Error('Le temps du dernier participant doit être supérieur au temps du premier.');
+      if(r.intermediateTimes!==undefined){
+        if(!Array.isArray(r.intermediateTimes)||r.intermediateTimes.length>2)throw Error('Deux temps intermédiaires maximum par parcours.');
+        if(r.intermediateTimes.length&&(!validDuration(r.firstDuration)||!validDuration(r.lastDuration)))throw Error('Renseignez les temps totaux avant les temps intermédiaires.');
+        let previousKm=0,previousFirst=0,previousLast=0;
+        for(const point of r.intermediateTimes){
+          if(!point||typeof point!=='object'||Array.isArray(point)||!Number.isFinite(point.km)||point.km<=previousKm||point.km>=r.distance)throw Error('Les kilomètres intermédiaires doivent être croissants et situés sur le parcours.');
+          if(!validDuration(point.firstDuration)||!validDuration(point.lastDuration))throw Error('Renseignez les deux temps intermédiaires au format HH:MM.');
+          const atFirst=durationMinutes(point.firstDuration),atLast=durationMinutes(point.lastDuration);
+          if(atFirst<=previousFirst||atLast<=previousLast||atFirst>=first||atLast>=last||atLast<atFirst)throw Error('Les temps intermédiaires doivent progresser entre le départ et l’arrivée, le dernier après le premier.');
+          previousKm=point.km;previousFirst=atFirst;previousLast=atLast;
+        }
+      }
+      for(const field of ['volunteerLeadMinutes','volunteerTailMinutes'])if(r[field]!==undefined&&(!Number.isInteger(r[field])||r[field]<0))throw Error('Les marges de présence doivent être des minutes entières positives.');
+    }
     if(r.courseIds){if(!Array.isArray(r.courseIds))throw Error('Liste de parcours invalide.');for(const id of r.courseIds){ref('courses',id);if(s.courses.find(c=>c.id===id).editionId!==r.editionId)throw Error('Le parcours appartient à une autre édition.');}}
     if(['courses','posts','aidStations','equipmentTypes','providerTypes','editions'].includes(key))required(r,['name']);
     if(key==='editions'&&!['summer','winter'].includes(r.season))throw Error('Saison invalide.');
-    if(key==='volunteers'){required(r,['firstName','lastName']);if(r.editionIds!==undefined){if(!Array.isArray(r.editionIds)||!r.editionIds.length)throw Error('Sélectionnez au moins une édition pour le bénévole.');for(const id of r.editionIds)ref('editions',id);}}
+    if(key==='volunteers'){required(r,['firstName','lastName']);if(r.editionIds!==undefined){if(!Array.isArray(r.editionIds)||(!r.organizationMember&&!r.editionIds.length))throw Error('Sélectionnez au moins une édition pour le bénévole.');for(const id of r.editionIds)ref('editions',id);}}
     if(key==='owners'){required(r,['lastName']);if(r.landRole&&!['owner','operator'].includes(r.landRole))throw Error('Statut foncier invalide.');if(r.referentId)ref('volunteers',r.referentId);if(r.agreementStatus&&!['to_contact','pending','approved'].includes(r.agreementStatus))throw Error('Statut d’accord propriétaire invalide.');if(r.thankedStatus&&!['todo','done'].includes(r.thankedStatus))throw Error('Statut de remerciement propriétaire invalide.');}
     if(key==='providers'){required(r,['company','typeId']);ref('providerTypes',r.typeId);if(r.mapPoints!==undefined){if(!Array.isArray(r.mapPoints)||r.mapPoints.some(point=>!coordinates(point)))throw Error('Les points prestataire doivent contenir des coordonnées valides.');}if(r.editionDetails!==undefined){if(!r.editionDetails||Array.isArray(r.editionDetails))throw Error('Historique prestataire invalide.');for(const [editionId,details] of Object.entries(r.editionDetails)){ref('editions',editionId);if(!details||typeof details!=='object'||Array.isArray(details))throw Error('Détail d’édition prestataire invalide.');if(details.cost!==undefined&&(!Number.isFinite(details.cost)||details.cost<0))throw Error('Le coût prestataire doit être positif.');if(details.validated!==undefined&&typeof details.validated!=='boolean')throw Error('Le statut prestataire doit être booléen.');}}}
     if(key==='equipment'){ref('equipmentTypes',r.typeId);for(const f of ['quantity','tables','chairs'])if(!Number.isInteger(r[f]??0)||(r[f]??0)<(f==='quantity'?1:0))throw Error('Quantités entières positives attendues.');}
     if(key==='equipmentTypes'){if(r.equipmentGroup!==undefined&&!['Sur site','Commissaire','Parcours','Ravitaillement'].includes(r.equipmentGroup))throw Error('Groupe de matériel invalide.');for(const f of ['width','depth','height'])if(r[f]!==undefined&&(!Number.isFinite(r[f])||r[f]<=0))throw Error('Dimensions positives attendues.');if(r.availableQuantity!==undefined&&(!Number.isInteger(r.availableQuantity)||r.availableQuantity<0))throw Error('La quantité disponible doit être un entier positif.');}
     if(key==='parcels'){ref('owners',r.ownerId);if(!['Polygon','MultiPolygon'].includes(r.geometry?.type))throw Error('Une géométrie de parcelle est nécessaire.');}
     if(key==='posts'){required(r,['number']);if(!Number.isInteger(r.required)||r.required<1)throw Error('Effectif requis : entier supérieur à zéro.');if(r.equipmentNeeds!==undefined){if(!Array.isArray(r.equipmentNeeds))throw Error('Liste de matériel invalide.');for(const need of r.equipmentNeeds){ref('equipmentTypes',need.typeId);if(!Number.isInteger(need.quantity)||need.quantity<1)throw Error('Quantité de matériel invalide.');}}if(r.date&&(r.start||r.end))time(r);else if(r.date&&!date(r.date))throw Error('La date du poste est invalide.');else if(r.start||r.end){if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.start)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.end)||r.end<=r.start)throw Error('Les horaires du poste sont invalides.');}if(r.timeSlots!==undefined&&(!Array.isArray(r.timeSlots)||!r.timeSlots.length||r.timeSlots.some(slot=>!Array.isArray(slot)||slot.length!==2||!/^([01]\d|2[0-3]):[0-5]\d$/.test(slot[0])||!/^([01]\d|2[0-3]):[0-5]\d$/.test(slot[1])||slot[1]<=slot[0])))throw Error('Les créneaux du poste sont invalides.');}
-    if(key==='assignments'){required(r,['volunteerId','postId','date']);ref('volunteers',r.volunteerId);ref('posts',r.postId);const volunteer=s.volunteers.find(v=>v.id===r.volunteerId);if(Array.isArray(volunteer.editionIds)&&!volunteer.editionIds.includes(r.editionId))throw Error('Le bénévole ne participe pas à cette édition.');if(s.posts.find(p=>p.id===r.postId).editionId!==r.editionId)throw Error('Le poste appartient à une autre édition.');if(r.start||r.end)time(r);else if(!date(r.date))throw Error('La date de l’affectation est invalide.');}
+    if(key==='assignments'){required(r,['volunteerId','postId','date']);ref('volunteers',r.volunteerId);ref('posts',r.postId);const volunteer=s.volunteers.find(v=>v.id===r.volunteerId);if(!volunteer.organizationMember&&Array.isArray(volunteer.editionIds)&&!volunteer.editionIds.includes(r.editionId))throw Error('Le bénévole ne participe pas à cette édition.');if(s.posts.find(p=>p.id===r.postId).editionId!==r.editionId)throw Error('Le poste appartient à une autre édition.');if(r.start||r.end)time(r);else if(!date(r.date))throw Error('La date de l’affectation est invalide.');}
     if(key==='aidStations'&&r.postId){ref('posts',r.postId);if(s.posts.find(p=>p.id===r.postId).editionId!==r.editionId)throw Error('Le poste appartient à une autre édition.');}
     if(key==='messages'){ref('volunteers',r.volunteerId);ref('posts',r.postId);if(s.posts.find(p=>p.id===r.postId).editionId!==r.editionId)throw Error('Conversation et poste : éditions différentes.');if(!['nouveau','lu','répondu','clôturé'].includes(r.status)||!Array.isArray(r.entries))throw Error('Conversation invalide.');}
   }
@@ -113,12 +167,14 @@ export function publicData(s){
   const pick=(r,keys)=>Object.fromEntries(keys.filter(k=>r[k]!==undefined).map(k=>[k,r[k]]));
   const postIds=new Set(s.posts.filter(p=>p.publicVisible).map(p=>p.id)),assignedVolunteerIds=new Set(s.assignments.filter(a=>postIds.has(a.postId)).map(a=>a.volunteerId));
   const volunteers=s.volunteers.filter(v=>v.active&&assignedVolunteerIds.has(v.id)).map(v=>pick(v,['id','firstName','lastName','editionIds','active']));
-  const ids=new Set(volunteers.map(v=>v.id));
-  return {schemaVersion:3,editions:s.editions.map(r=>pick(r,['id','season','year','name','date','site','lat','lng'])),courses:s.courses.map(r=>pick(r,['id','editionId','name','distance','gain','loss','departureTime','firstDuration','lastDuration','volunteerLeadMinutes','volunteerTailMinutes','color','visible','source','geojson'])),volunteers,
+  const ids=new Set(volunteers.map(v=>v.id)),branding=s.settings?.branding||{},publicBranding={};
+  for(const key of ['primaryColor','secondaryColor'])if(validBrandColor(branding[key]))publicBranding[key]=branding[key];
+  if(validBrandLogo(branding.logo))publicBranding.logo=branding.logo;
+  return {schemaVersion:3,editions:s.editions.map(r=>pick(r,['id','season','year','name','date','site','lat','lng'])),courses:s.courses.map(r=>pick(r,['id','editionId','name','distance','gain','loss','departureTime','firstDuration','lastDuration','intermediateTimes','volunteerLeadMinutes','volunteerTailMinutes','color','visible','source','geojson'])),volunteers,
     assignments:s.assignments.filter(a=>ids.has(a.volunteerId)&&postIds.has(a.postId)).map(r=>pick(r,['id','volunteerId','postId','editionId','date','endDate','start','end','instructions'])),
     posts:s.posts.filter(r=>r.publicVisible).map(r=>pick(r,['id','editionId','number','postType','name','lat','lng','date','endDate','start','end','timeSlots','required','equipmentNeeds','equipmentNeeded','instructions','courseIds','publicVisible'])),
     aidStations:s.aidStations.filter(r=>r.visible).map(r=>pick(r,['id','editionId','number','name','lat','lng','courseIds','km','information','start','end','visible'])),
-    mapElements:[...s.mapElements.filter(r=>r.visible).map(r=>pick(r,['id','editionId','name','kind','lat','lng','geometry','courseIds','visible'])),...s.editions.flatMap(e=>(s.operations?.[e.id]?.signs||[]).map(p=>({id:`sign-${e.id}-${p.id}`,editionId:e.id,name:p.label,kind:'panneau',lat:Number(p.lat),lng:Number(p.lng),visible:true})).filter(coordinates))],owners:[],parcels:[],equipment:[],equipmentTypes:s.equipmentTypes.map(r=>pick(r,['id','name','equipmentGroup'])),providerTypes:s.providerTypes.map(r=>pick(r,['id','name'])),providers:s.providers.filter(r=>coordinates(r)&&normalize(`${r.typeId} ${s.providerTypes.find(t=>t.id===r.typeId)?.name}`).includes('photo')).map(r=>pick(r,['id','company','typeId','lat','lng'])),messages:[],settings:{}};
+    mapElements:[...s.mapElements.filter(r=>r.visible).map(r=>pick(r,['id','editionId','name','kind','lat','lng','geometry','courseIds','visible'])),...s.editions.flatMap(e=>(s.operations?.[e.id]?.signs||[]).map(p=>({id:`sign-${e.id}-${p.id}`,editionId:e.id,name:p.label,kind:'panneau',lat:Number(p.lat),lng:Number(p.lng),visible:true})).filter(coordinates))],owners:[],parcels:[],equipment:[],equipmentTypes:s.equipmentTypes.map(r=>pick(r,['id','name','equipmentGroup'])),providerTypes:s.providerTypes.map(r=>pick(r,['id','name'])),providers:s.providers.filter(r=>coordinates(r)&&normalize(`${r.typeId} ${s.providerTypes.find(t=>t.id===r.typeId)?.name}`).includes('photo')).map(r=>pick(r,['id','company','typeId','lat','lng'])),messages:[],settings:Object.keys(publicBranding).length?{branding:publicBranding}:{}};
 }
 export function migrate(raw,seed){
   if(raw?.schemaVersion===3){const next=structuredClone(raw);for(const key of ['equipment','providers'])for(const record of next[key]||[])delete record.editionId;return validate(next);}

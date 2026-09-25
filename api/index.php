@@ -194,7 +194,7 @@ function public_state(array $state): array {
     return [
         'schemaVersion' => 3,
         'editions' => array_map(fn($r) => pick($r, ['id','season','year','name','date','site','lat','lng']), $state['editions'] ?? []),
-        'courses' => array_map(fn($r) => pick($r, ['id','editionId','name','distance','gain','loss','departureTime','firstDuration','lastDuration','volunteerLeadMinutes','volunteerTailMinutes','color','visible','source','geojson']), $state['courses'] ?? []),
+        'courses' => array_map(fn($r) => pick($r, ['id','editionId','name','distance','gain','loss','departureTime','firstDuration','lastDuration','intermediateTimes','volunteerLeadMinutes','volunteerTailMinutes','color','visible','source','geojson']), $state['courses'] ?? []),
         'volunteers' => array_map(fn($r) => pick($r, ['id','firstName','lastName','editionIds','active','publicVisible']), $visibleVolunteers),
         'assignments' => array_values(array_map(fn($r) => pick($r, ['id','volunteerId','postId','editionId','date','endDate','start','end','instructions']), array_filter($state['assignments'] ?? [], fn($r) => isset($volunteerIds[$r['volunteerId'] ?? ''], $postIds[$r['postId'] ?? ''])))),
         'posts' => array_map(fn($r) => pick($r, ['id','editionId','number','name','lat','lng','instructions','courseIds','publicVisible']), $visiblePosts),
@@ -202,7 +202,8 @@ function public_state(array $state): array {
         'mapElements' => array_values(array_map(fn($r) => pick($r, ['id','editionId','name','kind','lat','lng','courseIds','visible']), array_filter($state['mapElements'] ?? [], fn($r) => !empty($r['visible'])))),
         'providerTypes' => array_map(fn($r) => pick($r, ['id','name']), $types),
         'providers' => array_map(fn($r) => pick($r, ['id','company','typeId','lat','lng']), $providers),
-        'owners' => [], 'parcels' => [], 'equipment' => [], 'equipmentTypes' => [], 'messages' => [], 'settings' => new stdClass(),
+        'owners' => [], 'parcels' => [], 'equipment' => [], 'equipmentTypes' => [], 'messages' => [],
+        'settings' => is_array($state['settings']['branding'] ?? null) ? ['branding' => pick($state['settings']['branding'], ['primaryColor','secondaryColor','logo'])] : new stdClass(),
     ];
 }
 
