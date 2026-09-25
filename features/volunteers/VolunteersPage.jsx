@@ -71,17 +71,29 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
       <article><b>{result.active}</b><span>actifs</span></article>
       <article><b>{result.assigned}</b><span>affectés sur {edition?.name}</span></article>
     </div>
-    <div className="org-toolbar volunteer-toolbar">
+    <div className="org-toolbar volunteer-toolbar volunteer-directory-toolbar">
+      <div className="volunteer-search-row">
       <input type="search" aria-label="Rechercher un bénévole" placeholder="Nom, téléphone ou e-mail…" value={filters.query} onChange={event => filter('query', event.target.value)}/>
+      <button className="primary-button" disabled={busy} onClick={() => setEditing({})}>+ Ajouter</button>
+      </div>
+      <details className="directory-filters">
+      <summary>Filtres et tri{(filters.status || filters.postId) && <span className="filter-count">{Number(Boolean(filters.status))+Number(Boolean(filters.postId))}</span>}</summary>
+      <div className="directory-filter-fields">
       <select aria-label="Filtrer par statut" value={filters.status} onChange={event => filter('status', event.target.value)}><option value="">Tous les statuts</option><option value="active">Actifs</option><option value="inactive">Inactifs</option></select>
       <select aria-label="Filtrer par poste" value={filters.postId} onChange={event => filter('postId', event.target.value)}><option value="">Tous les postes</option><option value="none">Sans poste</option>{posts.map(post => <option key={post.id} value={post.id}>{post.number} · {post.name}</option>)}</select>
       <select aria-label="Trier les bénévoles" value={filters.sort} onChange={event => filter('sort', event.target.value)}><option value="asc">Nom A → Z</option><option value="desc">Nom Z → A</option><option value="post-asc">Poste A → Z</option><option value="post-desc">Poste Z → A</option></select>
-      <button disabled={busy} onClick={() => setEditing({})}>+ Ajouter</button>
+      </div>
+      </details>
+      <details className="directory-tools">
+      <summary>Outils de l’annuaire</summary>
+      <div className="directory-tool-actions">
       <button disabled={busy || !result.records.length} onClick={() => toggleAll(true)}>Tout activer</button>
       <button disabled={busy || !result.records.length} onClick={() => toggleAll(false)}>Tout désactiver</button>
       <button disabled={busy} onClick={reload}>Actualiser</button>
+      </div>
+      <ContactTransfer records={result.records} state={state} editionId={editionId} getSnapshot={repository.store.getSnapshot} onSave={save} disabled={busy}/>
+      </details>
     </div>
-    <ContactTransfer records={result.records} state={state} editionId={editionId} getSnapshot={repository.store.getSnapshot} onSave={save} disabled={busy}/>
     <div className="react-save-status" role="status">{busy ? 'Enregistrement…' : notice}</div>
     {error && !deleting && <p className="org-error" role="alert">{error} <button disabled={busy} onClick={reload}>Recharger les données</button></p>}
     <p className="org-result-count" aria-live="polite">{result.items.length} résultat(s)</p>
@@ -92,14 +104,14 @@ export default function VolunteersPage({ repository, editionId, onSave, onReload
       <td data-label="Bénévole" className="volunteer-identity-cell"><div className="volunteer-identity"><span className="volunteer-state-dot" aria-hidden="true"/><div><button className="org-link" disabled={busy} onClick={() => setEditing(volunteer)}>{volunteerName(volunteer)}</button>{volunteer.applicationPending ? <small className="volunteer-disabled-note">Nouvelle candidature</small> : !volunteer.active && <small className="volunteer-disabled-note">Bénévole désactivé</small>}{volunteer.organizationMember && <small className="volunteer-org-member">Organisation</small>}</div></div></td>
       <td data-label="Coordonnées" className="volunteer-contact">{volunteer.phone ? <a href={`tel:${volunteer.phone.replace(/[^+\d]/g, '')}`}>{volunteer.phone}</a> : <span>—</span>}{volunteer.email && <a href={`mailto:${volunteer.email}`}>{volunteer.email}</a>}</td>
       <td data-label="N° poste" className="volunteer-post-numbers">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-number" key={`${post.id}-${index}`}>{post.number}</span>) : '—'}</td>
-      <td data-label="Poste" className="volunteer-posts">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-name" key={`${post.id}-${index}`}>{post.name}</span>) : 'Sans poste'}</td>
+      <td data-label="Poste" className="volunteer-posts">{assignedPosts.length ? assignedPosts.map((post, index) => <span className="volunteer-post-name" key={`${post.id}-${index}`}><b className="volunteer-inline-post-number">{post.number}</b>{post.name}</span>) : 'Sans poste'}</td>
       <td data-label="Horaires" className="volunteer-hours">{assignments.length ? assignments.map(assignment => <span key={assignment.id}>{assignmentHours(assignment)}</span>) : '—'}</td>
-      <td data-label="Statut"><span className={`org-badge ${volunteer.applicationPending ? 'is-inactive' : volunteer.active && !assignments.length && !organizationOnly ? 'is-needs-assignment' : volunteer.active ? 'is-active' : 'is-inactive'}`}>{volunteer.applicationPending ? 'À traiter' : volunteer.active && !assignments.length && !organizationOnly ? 'À affecter' : volunteer.active ? 'Actif' : 'Désactivé'}</span></td>
+      <td data-label="Statut" className="volunteer-status"><span className={`org-badge ${volunteer.applicationPending ? 'is-inactive' : volunteer.active && !assignments.length && !organizationOnly ? 'is-needs-assignment' : volunteer.active ? 'is-active' : 'is-inactive'}`}>{volunteer.applicationPending ? 'À traiter' : volunteer.active && !assignments.length && !organizationOnly ? 'À affecter' : volunteer.active ? 'Actif' : 'Désactivé'}</span></td>
       <td data-label="Actions" className="org-row-actions volunteer-actions">
-        <button className="icon-action edit-action" disabled={busy} title="Modifier" aria-label={`Modifier ${volunteerName(volunteer)}`} onClick={() => setEditing(volunteer)}><ActionIcon name="edit"/></button>
-        <button className={`icon-action active-action ${volunteer.active ? 'is-enabled' : ''}`} disabled={busy} title={volunteer.active ? 'Désactiver' : 'Activer'} aria-label={`${volunteer.active ? 'Désactiver' : 'Activer'} ${volunteerName(volunteer)}`} onClick={() => toggle(volunteer)}><ActionIcon name="active"/></button>
-        <button className="icon-action transfer-action" disabled={busy} title={organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} aria-label={`${organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} ${volunteerName(volunteer)}`} onClick={() => transfer(volunteer)}><ActionIcon name={organizationOnly ? 'transfer' : 'crown'}/></button>
-        <button className="icon-action delete-action" disabled={busy} title="Supprimer" aria-label={`Supprimer ${volunteerName(volunteer)}`} onClick={() => { setError(''); setDeleting(volunteer); }}><ActionIcon name="delete"/></button>
+        <button className="icon-action edit-action" disabled={busy} title="Modifier" aria-label={`Modifier ${volunteerName(volunteer)}`} onClick={() => setEditing(volunteer)}><ActionIcon name="edit"/><span className="mobile-action-label">Modifier</span></button>
+        <button className={`icon-action active-action ${volunteer.active ? 'is-enabled' : ''}`} disabled={busy} title={volunteer.active ? 'Désactiver' : 'Activer'} aria-label={`${volunteer.active ? 'Désactiver' : 'Activer'} ${volunteerName(volunteer)}`} onClick={() => toggle(volunteer)}><ActionIcon name="active"/><span className="mobile-action-label">{volunteer.active ? 'Désactiver' : 'Activer'}</span></button>
+        <button className="icon-action transfer-action" disabled={busy} title={organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} aria-label={`${organizationOnly ? 'Transférer vers les bénévoles' : 'Transférer vers l’équipe organisation'} ${volunteerName(volunteer)}`} onClick={() => transfer(volunteer)}><ActionIcon name={organizationOnly ? 'transfer' : 'crown'}/><span className="mobile-action-label">Transférer</span></button>
+        <button className="icon-action delete-action" disabled={busy} title="Supprimer" aria-label={`Supprimer ${volunteerName(volunteer)}`} onClick={() => { setError(''); setDeleting(volunteer); }}><ActionIcon name="delete"/><span className="mobile-action-label">Supprimer</span></button>
       </td>
     </tr>)}{!result.items.length && <tr><td colSpan={7}>Aucun bénévole ne correspond à ces filtres.</td></tr>}</tbody></table></div>
     {editing && <VolunteerForm initial={editing} state={state} editionId={editionId} getSnapshot={repository.store.getSnapshot} onSave={save} onClose={() => setEditing(null)} organizationMember={organizationOnly}/>}

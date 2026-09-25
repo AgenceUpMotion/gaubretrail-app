@@ -7,6 +7,7 @@ import '../owner-status.css';
 import '../dashboard.css';
 import '../brand.css';
 import './modern.css';
+import './mobile.css';
 
 export const metadata = {
   icons: { icon: '/assets/logo-gaubretrail.svg' },

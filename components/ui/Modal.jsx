@@ -12,6 +12,6 @@ export default function Modal({ title, children, onClose, busy = false }) {
   return <dialog ref={ref} className="react-dialog" aria-labelledby={titleId}
     onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}
     onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
-    <h2 id={titleId}>{title}</h2>{children}
+    <header className="modal-header"><h2 id={titleId}>{title}</h2><button type="button" className="modal-close" aria-label="Fermer la fiche" disabled={busy} onClick={onClose}>×</button></header>{children}
   </dialog>;
 }
